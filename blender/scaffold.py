@@ -29,12 +29,23 @@ circle_diameter = [
     116.41, 98.99, 77.78
 ]
 
-# distance between LEDs in each circle (just for debugging)
-dists = []
-
 verts = [top_vert]
-faces = []
 edges = []
+faces = []
+
+start_index = 1
+
+#  (above)           |  (below)
+#  outer=1, inner=2  |  outer=3, inner=4
+#--------------------+----------------------
+#         1          |           13
+#         7          |           19
+#  0 6         8 2   |   12 18         20 14
+#                    |
+#                    |
+#  5 11        9 3   |   17 11         21 15
+#         10         |           22
+#         4          |           16
 
 for i in range(len(circle_num_vertices)):
 
@@ -44,14 +55,33 @@ for i in range(len(circle_num_vertices)):
     origin = (0, 0, circle_z[i])
 
     # add vertices for this circle
-    circle_verts = [poc(radius, origin, d) for d in circle_degrees]
-    verts.extend(circle_verts)
-    dists.append(math.dist(circle_verts[0], circle_verts[1]))
+    verts.extend([poc(radius, origin, d) for d in circle_degrees])    # circle1
+    verts.extend([poc(radius - 5, origin, d)
+                  for d in circle_degrees])    # circle2
+    origin = (0, 0, circle_z[i] - 5)
+    verts.extend([poc(radius, origin, d) for d in circle_degrees])    # circle3
+    verts.extend([poc(radius - 5, origin, d)
+                  for d in circle_degrees])    # circle4
 
-    # add edges for this circle
-    edges.append((len(verts) - len(circle_verts), len(verts) - 1))
-    for i in range(len(verts) - 1, len(verts) - len(circle_verts), -1):
-        edges.append((i, i - 1))
+    n = len(verts) - 1
+    nc = circle_num_vertices[i]
+
+    for i in range(start_index, start_index + nc):
+        v1 = start_index if i == start_index + nc - 1 else i + 1
+        v2 = start_index + nc if i == start_index + nc - 1 else nc + i + 1
+        v3 = start_index + nc * 2 if i == start_index + nc - 1 else nc * 2 + i + 1
+        v4 = start_index + nc * 3 if i == start_index + nc - 1 else nc * 3 + i + 1
+
+        # connect circle1 to circle2
+        faces.extend([(i, v1, v2, nc + i)])
+        # connect circle1 to circle3
+        faces.extend([(i, v1, v3, nc * 2 + i)])
+        # connect circle2 to circle4
+        faces.extend([(nc + i, v2, v4, nc * 3 + i)])
+        # connect circle3 to circle4
+        faces.extend([(nc * 2 + i, v3, v4, nc * 3 + i)])
+
+    start_index = len(verts)
 
 # create mesh and add to blender
 mesh_data = bpy.data.meshes.new("led_data")
