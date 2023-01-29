@@ -73,7 +73,7 @@ for i in range(len(circle_num_vertices)):
     radius = circle_diameter[i] / 2
     origin = (0, 0, circle_z[i])
 
-    # vertical rings
+    # vertical rings vertices: outer ring
     z = 0 if i < 7 else thickness / -2 if i == 7 else -thickness
     v_verts.extend([
         move(poc(radius, origin, 0), x=thickness / 2, z=z),
@@ -81,6 +81,8 @@ for i in range(len(circle_num_vertices)):
         move(poc(radius, origin, 180), x=thickness / 2, z=z),
         move(poc(radius, origin, 180), x=thickness / -2, z=z),
     ])
+
+    # vertical rings vertices: inner ring
     z = -thickness if i < 7 else 0 if i == 7 else thickness
     v_verts.extend([
         move(v_verts[len(v_verts) - 4], y=thickness, z=z),
@@ -88,6 +90,31 @@ for i in range(len(circle_num_vertices)):
         move(v_verts[len(v_verts) - 2], y=-thickness, z=z),
         move(v_verts[len(v_verts) - 1], y=-thickness, z=z),
     ])
+
+    # vertical rings faces
+    if i == 0:
+        v_faces.extend([
+            (0, 4, 5, 1),
+            (1, 5, 9, 3),
+            (3, 9, 8, 2),
+            (2, 8, 4, 0),
+            (0, 6, 7, 1),
+            (1, 7, 11, 3),
+            (3, 11, 10, 2),
+            (2, 10, 6, 0),
+        ])
+    else:
+        n = len(v_verts)
+        v_faces.extend([
+            (n - 1, n - 9, n - 10, n - 2),
+            (n - 2, n - 10, n - 14, n - 6),
+            (n - 6, n - 14, n - 13, n - 5),
+            (n - 5, n - 13, n - 9, n - 1),
+            (n - 3, n - 11, n - 12, n - 4),
+            (n - 4, n - 12, n - 16, n - 8),
+            (n - 8, n - 16, n - 15, n - 7),
+            (n - 7, n - 15, n - 11, n - 3),
+        ])
 
     # add vertices for this circle
     verts.extend([poc(radius, origin, d) for d in circle_degrees])    # circle1
@@ -118,5 +145,16 @@ for i in range(len(circle_num_vertices)):
 
     start_index = len(verts)
 
+# vertical rings, add faces to connect the bottom two joints
+n = len(v_verts)
+v_faces.extend([
+    (n - 1, n - 3, n - 4, n - 2),
+    (n - 2, n - 4, n - 8, n - 6),
+    (n - 6, n - 8, n - 7, n - 5),
+    (n - 5, n - 7, n - 3, n - 1),
+])
+
 create_mesh_obj(verts, edges, faces)
 create_mesh_obj(v_verts, v_edges, v_faces)
+obj = create_mesh_obj(v_verts, v_edges, v_faces)
+obj.rotation_euler = (0, 0, math.radians(90))
