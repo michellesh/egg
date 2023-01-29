@@ -12,7 +12,20 @@ def poc(radius, origin, d):
     return (x, y, origin[2])
 
 
+def create_mesh_obj(verts, edges, faces):
+    mesh_data = bpy.data.meshes.new("led_data")
+    mesh_data.from_pydata(verts, edges, faces)
+    mesh_obj = bpy.data.objects.new("led_object", mesh_data)
+    bpy.context.collection.objects.link(mesh_obj)
+    return mesh_obj
+
+
+def move(v, x=0, y=0, z=0):
+    return (v[0] + x, v[1] + y, v[2] + z)
+
+
 top_vert = (0, 0, 122.5)
+thickness = 5    # how thick each ring is in millimeters
 
 # number of vertices in each circle
 circle_num_vertices = [6, 12, 16, 22, 24, 28, 30, 30, 30, 28, 24, 22, 16]
@@ -29,11 +42,17 @@ circle_diameter = [
     116.41, 98.99, 77.78
 ]
 
+# horizontal rings
 verts = [top_vert]
 edges = []
 faces = []
-
 start_index = 1
+
+# vertical rings
+v_verts = [move(top_vert, x=thickness / 2), move(top_vert, x=thickness / -2)]
+v_verts.extend([move(v_verts[0], z=-thickness), move(v_verts[1], z=-thickness)])
+v_edges = []
+v_faces = []
 
 #  (above)           |  (below)
 #  outer=1, inner=2  |  outer=3, inner=4
@@ -54,13 +73,29 @@ for i in range(len(circle_num_vertices)):
     radius = circle_diameter[i] / 2
     origin = (0, 0, circle_z[i])
 
+    # vertical rings
+    z = 0 if i < 7 else thickness / -2 if i == 7 else -thickness
+    v_verts.extend([
+        move(poc(radius, origin, 0), x=thickness / 2, z=z),
+        move(poc(radius, origin, 0), x=thickness / -2, z=z),
+        move(poc(radius, origin, 180), x=thickness / 2, z=z),
+        move(poc(radius, origin, 180), x=thickness / -2, z=z),
+    ])
+    z = -thickness if i < 7 else 0 if i == 7 else thickness
+    v_verts.extend([
+        move(v_verts[len(v_verts) - 4], y=thickness, z=z),
+        move(v_verts[len(v_verts) - 3], y=thickness, z=z),
+        move(v_verts[len(v_verts) - 2], y=-thickness, z=z),
+        move(v_verts[len(v_verts) - 1], y=-thickness, z=z),
+    ])
+
     # add vertices for this circle
     verts.extend([poc(radius, origin, d) for d in circle_degrees])    # circle1
-    verts.extend([poc(radius - 5, origin, d)
+    verts.extend([poc(radius - thickness, origin, d)
                   for d in circle_degrees])    # circle2
-    origin = (0, 0, circle_z[i] - 5)
+    origin = (0, 0, circle_z[i] - thickness)
     verts.extend([poc(radius, origin, d) for d in circle_degrees])    # circle3
-    verts.extend([poc(radius - 5, origin, d)
+    verts.extend([poc(radius - thickness, origin, d)
                   for d in circle_degrees])    # circle4
 
     n = len(verts) - 1
@@ -83,10 +118,5 @@ for i in range(len(circle_num_vertices)):
 
     start_index = len(verts)
 
-# create mesh and add to blender
-mesh_data = bpy.data.meshes.new("led_data")
-mesh_data.from_pydata(verts, edges, faces)
-
-mesh_obj = bpy.data.objects.new("led_object", mesh_data)
-
-bpy.context.collection.objects.link(mesh_obj)
+create_mesh_obj(verts, edges, faces)
+create_mesh_obj(v_verts, v_edges, v_faces)
