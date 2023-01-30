@@ -70,10 +70,23 @@ start_index = 1
 prev_start_vertex = verts[0]
 
 # vertical rings
-v_verts = [move(top_vert, x=thickness / 2), move(top_vert, x=thickness / -2)]
-v_verts.extend([move(v_verts[0], z=-thickness), move(v_verts[1], z=-thickness)])
+v_verts = [
+    move(top_vert, x=thickness / 2),
+    move(top_vert, x=thickness / -2),
+    move(top_vert, x=thickness / 2, z=-thickness),
+    move(top_vert, x=thickness / -2, z=-thickness)
+]
 v_edges = []
-v_faces = []
+v_faces = [
+    (0, 4, 5, 1),
+    (1, 5, 9, 3),
+    (3, 9, 8, 2),
+    (2, 8, 4, 0),
+    (0, 6, 7, 1),
+    (1, 7, 11, 3),
+    (3, 11, 10, 2),
+    (2, 10, 6, 0),
+]
 
 #  (above)           |  (below)
 #  outer=1, inner=2  |  outer=3, inner=4
@@ -94,51 +107,6 @@ for i in range(len(circle_num_vertices)):
     radius = circle_diameter[i] / 2
     origin = (0, 0, circle_z[i])
 
-    # vertical rings vertices: outer ring
-    z = 0 if i < 7 else thickness / -2 if i == 7 else -thickness
-    v_verts.extend([
-        move(poc(radius, origin, 0), x=thickness / 2, z=z),
-        move(poc(radius, origin, 0), x=thickness / -2, z=z),
-        move(poc(radius, origin, 180), x=thickness / 2, z=z),
-        move(poc(radius, origin, 180), x=thickness / -2, z=z),
-    ])
-
-    # vertical rings vertices: inner ring
-    z = -thickness if i < 7 else 0 if i == 7 else thickness
-    v_verts.extend([
-        move(v_verts[len(v_verts) - 4], y=thickness, z=z),
-        move(v_verts[len(v_verts) - 3], y=thickness, z=z),
-        move(v_verts[len(v_verts) - 2], y=-thickness, z=z),
-        move(v_verts[len(v_verts) - 1], y=-thickness, z=z),
-    ])
-
-    # vertical rings faces
-    if i == 0:
-        # diagram reference: vertical_faces_i_0.png
-        v_faces.extend([
-            (0, 4, 5, 1),
-            (1, 5, 9, 3),
-            (3, 9, 8, 2),
-            (2, 8, 4, 0),
-            (0, 6, 7, 1),
-            (1, 7, 11, 3),
-            (3, 11, 10, 2),
-            (2, 10, 6, 0),
-        ])
-    else:
-        # diagram reference: vertical_faces.png
-        n = len(v_verts)
-        v_faces.extend([
-            (n - 1, n - 9, n - 10, n - 2),
-            (n - 2, n - 10, n - 14, n - 6),
-            (n - 6, n - 14, n - 13, n - 5),
-            (n - 5, n - 13, n - 9, n - 1),
-            (n - 3, n - 11, n - 12, n - 4),
-            (n - 4, n - 12, n - 16, n - 8),
-            (n - 8, n - 16, n - 15, n - 7),
-            (n - 7, n - 15, n - 11, n - 3),
-        ])
-
     # calculate the first vertex (at 0 degrees) for each circle
     c1 = poc(radius, origin, 0)
     how_far = thickness / distance(c1, prev_start_vertex)
@@ -146,20 +114,26 @@ for i in range(len(circle_num_vertices)):
     c3 = (c1[0], c1[1] + (c2[2] - c1[2]), c1[2] - (c2[1] - c1[1]))
     c4 = (c3[0], c3[1] + (c1[2] - c3[2]), c3[2] - (c1[1] - c3[1]))
 
-    # add vertices at each degree increment around each circle
+    # horizontal rings vertices at each degree increment around each circle
     origin = (0, 0, c1[2])
     radius = distance(c1, origin)
+    c1_180 = poc(radius, origin, 180)
     verts.extend([poc(radius, origin, d) for d in circle_degrees])    # circle1
+
     origin = (0, 0, c2[2])
     radius = distance(c2, origin)
     verts.extend([poc(radius, origin, d) for d in circle_degrees])    # circle2
+
     origin = (0, 0, c3[2])
     radius = distance(c3, origin)
+    c3_180 = poc(radius, origin, 180)
     verts.extend([poc(radius, origin, d) for d in circle_degrees])    # circle3
+
     origin = (0, 0, c4[2])
     radius = distance(c4, origin)
     verts.extend([poc(radius, origin, d) for d in circle_degrees])    # circle4
 
+    # horizontal rings faces
     nc = circle_num_vertices[i]
     for i in range(start_index, start_index + nc):
         v1 = start_index if i == start_index + nc - 1 else i + 1
@@ -167,17 +141,41 @@ for i in range(len(circle_num_vertices)):
         v3 = start_index + nc * 2 if i == start_index + nc - 1 else nc * 2 + i + 1
         v4 = start_index + nc * 3 if i == start_index + nc - 1 else nc * 3 + i + 1
 
-        # connect circle1 to circle2
-        faces.extend([(i, v1, v2, nc + i)])
-        # connect circle1 to circle3
-        faces.extend([(i, v1, v3, nc * 2 + i)])
-        # connect circle2 to circle4
-        faces.extend([(nc + i, v2, v4, nc * 3 + i)])
-        # connect circle3 to circle4
-        faces.extend([(nc * 2 + i, v3, v4, nc * 3 + i)])
+        faces.extend([
+            (i, v1, v2, nc + i),    # connect circle1 to circle2
+            (i, v1, v3, nc * 2 + i),    # connect circle1 to circle3
+            (nc + i, v2, v4, nc * 3 + i),    # connect circle2 to circle4
+            (nc * 2 + i, v3, v4, nc * 3 + i),    # connect circle3 to circle4
+        ])
+
+    # vertical rings vertices
+    v_verts.extend([
+        move(c1, x=thickness / 2),
+        move(c1, x=thickness / -2),
+        move(c1_180, x=thickness / 2),
+        move(c1_180, x=thickness / -2),
+        move(c3, x=thickness / 2),
+        move(c3, x=thickness / -2),
+        move(c3_180, x=thickness / 2),
+        move(c3_180, x=thickness / -2),
+    ])
 
     prev_start_vertex = verts[start_index]
     start_index = len(verts)
+
+# vertical rings faces
+for i in range(len(circle_num_vertices) - 1):
+    v = i * 8 + 4
+    v_faces.extend([
+        (v + 0, v + 8,  v + 9,  v + 1),
+        (v + 1, v + 9,  v + 13, v + 5),
+        (v + 5, v + 13, v + 12, v + 4),
+        (v + 4, v + 12, v + 8,  v + 0),
+        (v + 2, v + 10, v + 11, v + 3),
+        (v + 3, v + 11, v + 15, v + 7),
+        (v + 7, v + 15, v + 14, v + 6),
+        (v + 6, v + 14, v + 10, v + 2),
+    ])
 
 # vertical rings, add faces to connect the bottom two joints
 n = len(v_verts)
