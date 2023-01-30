@@ -32,10 +32,10 @@ def distance(p1, p2):
                      (p2[2] - p1[2])**2)
 
 
-def create_mesh_obj(verts, edges, faces):
-    mesh_data = bpy.data.meshes.new("led_data")
+def create_mesh_obj(verts, edges, faces, name="led"):
+    mesh_data = bpy.data.meshes.new(name + "_data")
     mesh_data.from_pydata(verts, edges, faces)
-    mesh_obj = bpy.data.objects.new("led_object", mesh_data)
+    mesh_obj = bpy.data.objects.new(name + "_object", mesh_data)
     bpy.context.collection.objects.link(mesh_obj)
     return mesh_obj
 
@@ -69,6 +69,9 @@ faces = []
 start_index = 1
 prev_start_vertex = verts[0]
 
+# horizontal rings for notches
+notch_verts = [top_vert]
+
 # vertical rings
 v_verts = [
     move(top_vert, x=thickness / 2),
@@ -86,6 +89,14 @@ v_faces = [
     (1, 7, 11, 3),
     (3, 11, 10, 2),
     (2, 10, 6, 0),
+]
+
+# vertical rings for notches
+v_notch_verts = [
+    move(top_vert, x=thickness / 2),
+    move(top_vert, x=thickness / -2),
+    move(top_vert, x=thickness / 2, z=thickness / -2),
+    move(top_vert, x=thickness / -2, z=thickness / -2),
 ]
 
 #  (above)           |  (below)
@@ -113,6 +124,8 @@ for i in range(len(circle_num_vertices)):
     c2 = pol(c1, prev_start_vertex, how_far)
     c3 = (c1[0], c1[1] + (c2[2] - c1[2]), c1[2] - (c2[1] - c1[1]))
     c4 = (c3[0], c3[1] + (c1[2] - c3[2]), c3[2] - (c1[1] - c3[1]))
+    notch_c1 = pol(c1, c3, 0.5)
+    notch_c2 = pol(c2, c4, 0.5)
 
     # horizontal rings vertices at each degree increment around each circle
     origin = (0, 0, c1[2])
@@ -132,6 +145,23 @@ for i in range(len(circle_num_vertices)):
     origin = (0, 0, c4[2])
     radius = distance(c4, origin)
     verts.extend([poc(radius, origin, d) for d in circle_degrees])    # circle4
+
+    # horizontal notch rings vertices
+    origin = (0, 0, notch_c1[2])
+    radius = distance(notch_c1, origin)
+    notch_verts.extend([poc(radius, origin, d) for d in circle_degrees])    # circle1
+
+    origin = (0, 0, notch_c2[2])
+    radius = distance(notch_c2, origin)
+    notch_verts.extend([poc(radius, origin, d) for d in circle_degrees])    # circle2
+
+    origin = (0, 0, c3[2])
+    radius = distance(c3, origin)
+    notch_verts.extend([poc(radius, origin, d) for d in circle_degrees])    # circle3
+
+    origin = (0, 0, c4[2])
+    radius = distance(c4, origin)
+    notch_verts.extend([poc(radius, origin, d) for d in circle_degrees])    # circle4
 
     # horizontal rings faces
     nc = circle_num_vertices[i]
@@ -160,6 +190,20 @@ for i in range(len(circle_num_vertices)):
         move(c3_180, x=thickness / -2),
     ])
 
+    # vertical notch rings vertices
+    c1_c3 = pol(c1, c3, 0.5)
+    c1_c3_180 = pol(c1_180, c3_180, 0.5)
+    v_notch_verts.extend([
+        move(c1, x=thickness / 2),
+        move(c1, x=thickness / -2),
+        move(c1_180, x=thickness / 2),
+        move(c1_180, x=thickness / -2),
+        move(c1_c3, x=thickness / 2),
+        move(c1_c3, x=thickness / -2),
+        move(c1_c3_180, x=thickness / 2),
+        move(c1_c3_180, x=thickness / -2),
+    ])
+
     prev_start_vertex = verts[start_index]
     start_index = len(verts)
 
@@ -186,7 +230,13 @@ v_faces.extend([
     (n - 5, n - 7, n - 3, n - 1),
 ])
 
-create_mesh_obj(verts, edges, faces)
-create_mesh_obj(v_verts, v_edges, v_faces)
-obj = create_mesh_obj(v_verts, v_edges, v_faces)
+create_mesh_obj(verts, edges, faces, name="horizontal_rings")
+create_mesh_obj(notch_verts, edges, faces, name="horizontal_rings_notches")
+
+create_mesh_obj(v_verts, v_edges, v_faces, name="vertical_ring_1")
+obj = create_mesh_obj(v_verts, v_edges, v_faces, name="vertical_ring_2")
+obj.rotation_euler = (0, 0, math.radians(90))
+
+create_mesh_obj(v_notch_verts, v_edges, v_faces, name="vertical_notch_ring_1")
+obj = create_mesh_obj(v_notch_verts, v_edges, v_faces, name="vertical_notch_ring_2")
 obj.rotation_euler = (0, 0, math.radians(90))
