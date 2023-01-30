@@ -4,12 +4,32 @@ from numpy import linspace
 
 
 def poc(radius, origin, d):
-    '''returns a point `d` degrees along the circumference of a circle with given `radius` and `origin` point'''
+    '''get a point on the circumference of a circle
+    d : degrees along the circumference of the cricle
+    radius : radius of the circle
+    origin : (x, y, z) center coordinates of the circle
+    '''
     degrees = d + 270 if d - 90 < 0 else d - 90
     radians = (degrees * math.pi) / 180
     x = origin[0] + radius * math.cos(radians)
     y = origin[1] + radius * math.sin(radians)
     return (x, y, origin[2])
+
+
+def pol(p1, p2, how_far):
+    '''get a point on the line that forms between p1 and p2
+    p1 : (x, y, z) start point of line
+    p2 : (x, y, z) end point of line
+    how_far : value between 0 and 1, how far along the line
+    '''
+    return (p1[0] + (p2[0] - p1[0]) * how_far,
+            p1[1] + (p2[1] - p1[1]) * how_far,
+            p1[2] + (p2[2] - p1[2]) * how_far)
+
+
+def distance(p1, p2):
+    return math.sqrt((p2[0] - p1[0])**2 + (p2[1] - p1[1])**2 +
+                     (p2[2] - p1[2])**2)
 
 
 def create_mesh_obj(verts, edges, faces):
@@ -25,7 +45,7 @@ def move(v, x=0, y=0, z=0):
 
 
 top_vert = (0, 0, 122.5)
-thickness = 5    # how thick each ring is in millimeters
+thickness = 3    # how thick each ring is in millimeters
 
 # number of vertices in each circle
 circle_num_vertices = [6, 12, 16, 22, 24, 28, 30, 30, 30, 28, 24, 22, 16]
@@ -47,6 +67,7 @@ verts = [top_vert]
 edges = []
 faces = []
 start_index = 1
+prev_start_vertex = verts[0]
 
 # vertical rings
 v_verts = [move(top_vert, x=thickness / 2), move(top_vert, x=thickness / -2)]
@@ -93,6 +114,7 @@ for i in range(len(circle_num_vertices)):
 
     # vertical rings faces
     if i == 0:
+        # diagram reference: vertical_faces_i_0.png
         v_faces.extend([
             (0, 4, 5, 1),
             (1, 5, 9, 3),
@@ -104,6 +126,7 @@ for i in range(len(circle_num_vertices)):
             (2, 10, 6, 0),
         ])
     else:
+        # diagram reference: vertical_faces.png
         n = len(v_verts)
         v_faces.extend([
             (n - 1, n - 9, n - 10, n - 2),
@@ -116,18 +139,28 @@ for i in range(len(circle_num_vertices)):
             (n - 7, n - 15, n - 11, n - 3),
         ])
 
-    # add vertices for this circle
+    # calculate the first vertex (at 0 degrees) for each circle
+    c1 = poc(radius, origin, 0)
+    how_far = thickness / distance(c1, prev_start_vertex)
+    c2 = pol(c1, prev_start_vertex, how_far)
+    c3 = (c1[0], c1[1] + (c2[2] - c1[2]), c1[2] - (c2[1] - c1[1]))
+    c4 = (c3[0], c3[1] + (c1[2] - c3[2]), c3[2] - (c1[1] - c3[1]))
+
+    # add vertices at each degree increment around each circle
+    origin = (0, 0, c1[2])
+    radius = distance(c1, origin)
     verts.extend([poc(radius, origin, d) for d in circle_degrees])    # circle1
-    verts.extend([poc(radius - thickness, origin, d)
-                  for d in circle_degrees])    # circle2
-    origin = (0, 0, circle_z[i] - thickness)
+    origin = (0, 0, c2[2])
+    radius = distance(c2, origin)
+    verts.extend([poc(radius, origin, d) for d in circle_degrees])    # circle2
+    origin = (0, 0, c3[2])
+    radius = distance(c3, origin)
     verts.extend([poc(radius, origin, d) for d in circle_degrees])    # circle3
-    verts.extend([poc(radius - thickness, origin, d)
-                  for d in circle_degrees])    # circle4
+    origin = (0, 0, c4[2])
+    radius = distance(c4, origin)
+    verts.extend([poc(radius, origin, d) for d in circle_degrees])    # circle4
 
-    n = len(verts) - 1
     nc = circle_num_vertices[i]
-
     for i in range(start_index, start_index + nc):
         v1 = start_index if i == start_index + nc - 1 else i + 1
         v2 = start_index + nc if i == start_index + nc - 1 else nc + i + 1
@@ -143,6 +176,7 @@ for i in range(len(circle_num_vertices)):
         # connect circle3 to circle4
         faces.extend([(nc * 2 + i, v3, v4, nc * 3 + i)])
 
+    prev_start_vertex = verts[start_index]
     start_index = len(verts)
 
 # vertical rings, add faces to connect the bottom two joints
