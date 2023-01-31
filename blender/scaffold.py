@@ -32,10 +32,10 @@ def distance(p1, p2):
                      (p2[2] - p1[2])**2)
 
 
-def create_mesh_obj(verts, edges, faces, name="led"):
+def create_mesh_obj(verts, edges, faces, name="mesh"):
     mesh_data = bpy.data.meshes.new(name + "_data")
     mesh_data.from_pydata(verts, edges, faces)
-    mesh_obj = bpy.data.objects.new(name + "_object", mesh_data)
+    mesh_obj = bpy.data.objects.new(name, mesh_data)
     bpy.context.collection.objects.link(mesh_obj)
     return mesh_obj
 
@@ -91,12 +91,20 @@ v_faces = [
     (2, 10, 6, 0),
 ]
 
-# vertical rings for notches
+# vertical ring inner notches for taking the diff out of horizontal rings
 v_notch_verts = [
     move(top_vert, x=thickness / 2),
     move(top_vert, x=thickness / -2),
     move(top_vert, x=thickness / 2, z=thickness / -2),
     move(top_vert, x=thickness / -2, z=thickness / -2),
+]
+
+# vertical ring inner notches for taking the diff out of the other vertical ring
+v_notch_inner_verts = [
+    move(top_vert, x=thickness / 2, z=thickness / -2),
+    move(top_vert, x=thickness / -2, z=thickness / -2),
+    move(top_vert, x=thickness / 2, z=-thickness),
+    move(top_vert, x=thickness / -2, z=-thickness),
 ]
 
 #  (above)           |  (below)
@@ -204,6 +212,17 @@ for i in range(len(circle_num_vertices)):
         move(c1_c3_180, x=thickness / -2),
     ])
 
+    v_notch_inner_verts.extend([
+        move(c1_c3, x=thickness / 2),
+        move(c1_c3, x=thickness / -2),
+        move(c1_c3_180, x=thickness / 2),
+        move(c1_c3_180, x=thickness / -2),
+        move(c3, x=thickness / 2),
+        move(c3, x=thickness / -2),
+        move(c3_180, x=thickness / 2),
+        move(c3_180, x=thickness / -2),
+    ])
+
     prev_start_vertex = verts[start_index]
     start_index = len(verts)
 
@@ -231,12 +250,15 @@ v_faces.extend([
 ])
 
 create_mesh_obj(verts, edges, faces, name="horizontal_rings")
-create_mesh_obj(notch_verts, edges, faces, name="horizontal_rings_notches")
+create_mesh_obj(notch_verts, edges, faces, name="horizontal_notches")
+#create_mesh_obj(notch_verts, edges, faces, name="horizontal_notches_2")
 
 create_mesh_obj(v_verts, v_edges, v_faces, name="vertical_ring_1")
 obj = create_mesh_obj(v_verts, v_edges, v_faces, name="vertical_ring_2")
 obj.rotation_euler = (0, 0, math.radians(90))
 
-create_mesh_obj(v_notch_verts, v_edges, v_faces, name="vertical_notch_ring_1")
-obj = create_mesh_obj(v_notch_verts, v_edges, v_faces, name="vertical_notch_ring_2")
+create_mesh_obj(v_notch_verts, v_edges, v_faces, name="vertical_notches_1")
+obj = create_mesh_obj(v_notch_verts, v_edges, v_faces, name="vertical_notches_2")
 obj.rotation_euler = (0, 0, math.radians(90))
+
+create_mesh_obj(v_notch_inner_verts, v_edges, v_faces, name="vertical_notches_inner")
