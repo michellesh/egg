@@ -1,3 +1,5 @@
+# script for finding points evenly spaced around the perimeter of an ellipse
+
 import numpy as np
 import scipy.special
 import scipy.optimize
