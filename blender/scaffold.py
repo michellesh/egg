@@ -44,22 +44,37 @@ def move(v, x=0, y=0, z=0):
     return (v[0] + x, v[1] + y, v[2] + z)
 
 
-top_vert = (0, 0, 122.5)
-thickness = 3    # how thick each ring is in millimeters
+top_vert = (0, 0, 124)
+thickness = 4    # how thick each ring is in millimeters
 
 # number of vertices in each circle
-circle_num_vertices = [6, 12, 16, 22, 24, 28, 30, 30, 30, 28, 24, 22, 16]
+circle_num_vertices = [
+    # Distance between LEDs in each ring:
+    7,    # Ring 0: [5, 6, 7] [19.42, 16.52, 14.34]
+    11,    # Ring 1: [10, 11, 12] [18.94, 17.27, 15.86]
+    15,    # Ring 2: [14, 15, 16] [18.77, 17.54, 16.46]
+    19,    # Ring 3: [18, 19, 20] [17.88, 16.95, 16.11]
+    21,    # Ring 4: [20, 21, 22] [18.42, 17.55, 16.76]
+    23,    # Ring 5: [22, 23, 24] [18.35, 17.55, 16.83]
+    25,    # Ring 6: [24, 25, 26] [17.78, 17.07, 16.42]
+    25,    # Ring 7: [24, 25, 26] [18.23, 17.5, 16.83]
+    25,    # Ring 8: [24, 25, 26] [18.1, 17.38, 16.71]
+    25,    # Ring 9: [23, 24, 25] [18.05, 17.31, 16.62]
+    23,    # Ring 10: [21, 22, 23] [17.98, 17.17, 16.43]
+    19,    # Ring 11: [17, 18, 19] [18.8, 17.76, 16.84]
+    15,    # Ring 12: [13, 14, 15] [18.61, 17.31, 16.17]
+]
 
 # z coordinate of each circle
 circle_z = [
-    119.86, 112.36, 100.8, 86.03, 68.97, 50.54, 31.6, 12.91, -4.85, -21.11,
-    -35.46, -47.55, -57.15
+    119.978, 110.52, 98.0201, 83.8016, 68.496, 52.4351, 35.8279, 18.9098,
+    1.91173, -14.8137, -30.7232, -45.036, -56.8221
 ]
 
 # diameter of each circle
 circle_diameter = [
-    27.31, 53.58, 77.78, 98.99, 116.41, 129.34, 137.31, 140, 137.31, 129.34,
-    116.41, 98.99, 77.78
+    33.0401, 61.2911, 84.3618, 102.988, 117.7806, 128.9127, 136.2106, 139.6347,
+    138.668, 132.5939, 120.6395, 102.3022, 77.7783
 ]
 
 # horizontal rings
@@ -157,19 +172,23 @@ for i in range(len(circle_num_vertices)):
     # horizontal notch rings vertices
     origin = (0, 0, notch_c1[2])
     radius = distance(notch_c1, origin)
-    notch_verts.extend([poc(radius, origin, d) for d in circle_degrees])    # circle1
+    notch_verts.extend([poc(radius, origin, d)
+                        for d in circle_degrees])    # circle1
 
     origin = (0, 0, notch_c2[2])
     radius = distance(notch_c2, origin)
-    notch_verts.extend([poc(radius, origin, d) for d in circle_degrees])    # circle2
+    notch_verts.extend([poc(radius, origin, d)
+                        for d in circle_degrees])    # circle2
 
     origin = (0, 0, c3[2])
     radius = distance(c3, origin)
-    notch_verts.extend([poc(radius, origin, d) for d in circle_degrees])    # circle3
+    notch_verts.extend([poc(radius, origin, d)
+                        for d in circle_degrees])    # circle3
 
     origin = (0, 0, c4[2])
     radius = distance(c4, origin)
-    notch_verts.extend([poc(radius, origin, d) for d in circle_degrees])    # circle4
+    notch_verts.extend([poc(radius, origin, d)
+                        for d in circle_degrees])    # circle4
 
     # horizontal rings faces
     nc = circle_num_vertices[i]
@@ -230,10 +249,10 @@ for i in range(len(circle_num_vertices)):
 for i in range(len(circle_num_vertices) - 1):
     v = i * 8 + 4
     v_faces.extend([
-        (v + 0, v + 8,  v + 9,  v + 1),
-        (v + 1, v + 9,  v + 13, v + 5),
+        (v + 0, v + 8, v + 9, v + 1),
+        (v + 1, v + 9, v + 13, v + 5),
         (v + 5, v + 13, v + 12, v + 4),
-        (v + 4, v + 12, v + 8,  v + 0),
+        (v + 4, v + 12, v + 8, v + 0),
         (v + 2, v + 10, v + 11, v + 3),
         (v + 3, v + 11, v + 15, v + 7),
         (v + 7, v + 15, v + 14, v + 6),
@@ -251,14 +270,19 @@ v_faces.extend([
 
 create_mesh_obj(verts, edges, faces, name="horizontal_rings")
 create_mesh_obj(notch_verts, edges, faces, name="horizontal_notches")
-#create_mesh_obj(notch_verts, edges, faces, name="horizontal_notches_2")
 
 create_mesh_obj(v_verts, v_edges, v_faces, name="vertical_ring_1")
 obj = create_mesh_obj(v_verts, v_edges, v_faces, name="vertical_ring_2")
 obj.rotation_euler = (0, 0, math.radians(90))
 
 create_mesh_obj(v_notch_verts, v_edges, v_faces, name="vertical_notches_1")
-obj = create_mesh_obj(v_notch_verts, v_edges, v_faces, name="vertical_notches_2")
+obj = create_mesh_obj(v_notch_verts,
+                      v_edges,
+                      v_faces,
+                      name="vertical_notches_2")
 obj.rotation_euler = (0, 0, math.radians(90))
 
-create_mesh_obj(v_notch_inner_verts, v_edges, v_faces, name="vertical_notches_inner")
+create_mesh_obj(v_notch_inner_verts,
+                v_edges,
+                v_faces,
+                name="vertical_notches_inner")
