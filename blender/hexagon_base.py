@@ -1,4 +1,5 @@
 import bpy
+from math import radians
 
 
 def create_mesh_obj(verts, edges, faces, name="mesh"):
@@ -7,6 +8,19 @@ def create_mesh_obj(verts, edges, faces, name="mesh"):
     mesh_obj = bpy.data.objects.new(name, mesh_data)
     bpy.context.collection.objects.link(mesh_obj)
     return mesh_obj
+
+def add_cube(name='Cube', dimensions=(0, 0, 0), **kwargs):
+    bpy.ops.mesh.primitive_cube_add(**kwargs)
+    obj = bpy.context.object
+    obj.name = name
+    obj.data.name = name + '_data'
+    obj.dimensions = dimensions
+
+def add_cylinder(name='Cylinder', **kwargs):
+    bpy.ops.mesh.primitive_cylinder_add(**kwargs)
+    obj = bpy.context.object
+    obj.name = name
+    obj.data.name = name + '_data'
 
 
 #name = 'Hexagon'
@@ -75,19 +89,30 @@ def create_mesh_obj(verts, edges, faces, name="mesh"):
 #         (2, 3, 9, 8), (3, 4, 10, 9), (4, 5, 11, 10), (5, 0, 6, 11)]
 #create_mesh_obj(verts, edges, faces, name=name)
 
-def add_cube(name='Cube', dimensions=(0, 0, 0), **kwargs):
-    bpy.ops.mesh.primitive_cube_add(**kwargs)
-    obj = bpy.context.object
-    obj.name = name
-    obj.data.name = name + '_data'
-    obj.dimensions = dimensions
 
-def add_cylinder(name='Cylinder', **kwargs):
-    bpy.ops.mesh.primitive_cylinder_add(**kwargs)
-    obj = bpy.context.object
-    obj.name = name
-    obj.data.name = name + '_data'
+## Hexagon Holes: Back
+#add_cube(name='Hexagon.Diff.OnOffSwitch', dimensions=(18.5, 13, 4), location=(0, 52.89, 11.96), rotation=(radians(-56.25), 0, 0))
+#add_cylinder(name='Hexagon.Diff.PowerCable', radius=3.5, depth=4, location=(0, 57, -1.5), rotation=(radians(-56.25), 0, 0))
+#
+## Hexagon Holes: Top
+#add_cylinder(name='Hexagon.Diff.SwivelKnob', radius=3.5, depth=5, location=(0, 9.96, 24.31))
+#add_cylinder(name='Hexagon.Diff.MicroUsb', radius=6, depth=30, location=(-18, 9.96, 12), rotation=(0, 0, radians(5.625)))
+#add_cylinder(name='Hexagon.MicroUsbTunnel', radius=8.5, depth=22, location=(-18, 9.96, 12.668), rotation=(0, 0, radians(5.625)))
+## Move the inner half toward center: gx 6
+#
+## Hexagon Holes: Front
+#add_cylinder(name='Hexagon.Diff.Knob1', radius=3.5, depth=5, location=(-15, -40.91, 2.85), rotation=(radians(52.43), 0, 0))
+#add_cube(name='Hexagon.Diff.KnobTab1', dimensions=(2, 1, 2), location=(-15, -43.75, -2.6), rotation=(radians(52.43), 0, 0))
+#add_cylinder(name='Hexagon.Diff.Knob2', radius=3.5, depth=5, location=(15, -40.91, 2.85), rotation=(radians(52.43), 0, 0))
+#add_cube(name='Hexagon.Diff.KnobTab2', dimensions=(2, 1, 2), location=(15, -43.75, -2.6), rotation=(radians(52.43), 0, 0))
+#
+## Hexagon Tabs
+#add_cylinder(name='Hexagon.Tab1', radius=4, depth=2, location=(-40, -48, -15))
+#add_cylinder(name='Hexagon.Tab2', radius=4, depth=2, location=(40, -48, -15))
+#add_cylinder(name='Hexagon.Tab3', radius=4, depth=2, location=(27, 58, -15))
+#add_cylinder(name='Hexagon.Tab4', radius=4, depth=2, location=(-27, 58, -15))
 
 
-add_cube(name='Cubey', dimensions=(3, 4, 5), location=(0, 0, 45))
-add_cylinder(name='Cindy', radius=5, depth=7, location=(0, 0, 35), rotation=(45, 0, 0))
+
+#add_cube(name='Hole', dimensions=(x, y, z), location=(x, y, z))
+#add_cylinder(name='Hole', radius=r, depth=d, location=(x, y, z))
