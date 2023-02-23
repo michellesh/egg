@@ -1,4 +1,5 @@
 #include <FastLED.h>
+#include "Ring.h"
 
 // Pins
 #define ENCODER_CLK 5 // D1
@@ -8,9 +9,11 @@
 
 #define MAX_CLICKS 40 // total clicks around the rotary encoders
 #define NUM_LEDS 150  // TODO this is only the number glued so far
+#define NUM_RINGS 13
 #define MAX_BRIGHTNESS 255
 
 CRGB leds[NUM_LEDS];
+Ring rings[NUM_RINGS];
 int knobAngle = 0;
 
 void setup() {
@@ -19,6 +22,7 @@ void setup() {
 
   Serial.begin(115200);
   delay(500);
+  setupRings();
 }
 
 void loop() {
