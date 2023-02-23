@@ -1,17 +1,19 @@
 // number of LEDs in each ring
-int ringNumLEDs[] = {7, 11, 15, 19, 21, 23, 25, 25, 25, 25, 23, 19, 15};
+int ringNumLEDs[] = {15, 19, 23, 25, 25, 25, 25, 23, 21, 19, 15, 11, 7};
 
 // height (z index) of each ring
-// float ringHeight[] = {119.978,  110.52,  98.0201, 83.8016, 68.496,
-//                      52.4351,  35.8279, 18.9098, 1.91173, -14.8137,
-//                      -30.7232, -45.036, -56.8221};
-float ringHeight[] = {176.8, 167.3, 154.8, 140.6, 125.3, 109.3, 92.7,
-                      75.7,  58.7,  42.1,  26.1,  11.8,  0};
+float ringHeight[] = {0,     11.8,  26.1,  42.1,  58.7,  75.7, 92.7,
+                      109.3, 125.3, 140.6, 154.8, 167.3, 176.8};
+float maxRingHeight = 75.7; // TODO will be 176.8
+
+// how many LEDs off is the beginning of the ring from where the LED strip
+// starts on that ring
+float ringOffset[] = {-0.5, -1.0, -1.5, -2.0, -2.5, -3.0, -3.5,
+                      -4.0, -4.5, -5.0, -5.5, -6.0, -6.5};
 
 // diameter of each ring
-float ringDiameter[] = {33.0401,  61.2911,  84.3618,  102.988, 117.7806,
-                        128.9127, 136.2106, 139.6347, 138.668, 132.5939,
-                        120.6395, 102.3022, 77.7783};
+float ringDiameter[] = {77.78,  102.3,  120.64, 132.59, 138.67, 139.63, 136.21,
+                        128.91, 117.78, 102.99, 84.36,  61.29,  33.04};
 
 struct Ring {
   int ringIndex;
@@ -20,5 +22,5 @@ struct Ring {
   float diameter;
 
   CRGB *leds; // array of LEDs in this ring
-  float *deg; // array of LEDs positions around the ring in degrees
+  float *deg; // degree position of each LED in this ring
 };
