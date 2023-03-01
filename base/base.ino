@@ -16,15 +16,17 @@
 #define RIGHT_LED_PIN 14
 
 #define MAX_CLICKS 40
+#define SATURATION 100
+#define BRIGHTNESS 255
 
-int leftKnobAngle = 0;
-int rightKnobAngle = 0;
-int swivelAngle = 0;
+bool cursorOn = true;
+CHSV color = CHSV(0, SATURATION, BRIGHTNESS);
 
-RotaryEncoder leftKnob = {LEFT_KNOB_CLK, LEFT_KNOB_DT, LEFT_KNOB_SW, 0, 0, 0};
+RotaryEncoder leftKnob = {
+    LEFT_KNOB_CLK, LEFT_KNOB_DT, LEFT_KNOB_SW, 0, 0, 0, 0};
 RotaryEncoder rightKnob = {
-    RIGHT_KNOB_CLK, RIGHT_KNOB_DT, RIGHT_KNOB_SW, 0, 0, 0};
-RotaryEncoder swivel = {SWIVEL_CLK, SWIVEL_DT, SWIVEL_SW, 0, 0, 0};
+    RIGHT_KNOB_CLK, RIGHT_KNOB_DT, RIGHT_KNOB_SW, 0, 0, 0, 0};
+RotaryEncoder swivel = {SWIVEL_CLK, SWIVEL_DT, SWIVEL_SW, 0, 0, 0, 0};
 
 CRGB leds[2];
 
@@ -42,27 +44,59 @@ void setup() {
   FastLED.addLeds<WS2812B, LEFT_LED_PIN, GRB>(leds, 1);
   FastLED.addLeds<WS2812B, RIGHT_LED_PIN, GRB>(leds, 1, 1);
 
+  leftKnob.led = &leds[0];
+  rightKnob.led = &leds[1];
+
   Serial.begin(115200);
   delay(500);
 }
 
 void loop() {
-  FastLED.clear();
-
   leftKnob.update();
   rightKnob.update();
   swivel.update();
 
-  EVERY_N_MILLISECONDS(500) {
-    Serial.print("Left knob angle: ");
-    Serial.println(leftKnob.angle);
-    Serial.print("Right knob angle: ");
-    Serial.println(rightKnob.angle);
-    Serial.print("Swivel angle: ");
-    Serial.println(swivel.angle);
+  if (anyButtonClicked()) {
+    Serial.print("Cursor toggled ");
+    cursorOn = !cursorOn;
+    if (cursorOn) {
+      Serial.println("ON");
+    } else {
+      Serial.println("OFF");
+    }
+    // TODO send receiver toggle cursor on/off
   }
 
-  leds[0] = CRGB::Green;
-  leds[1] = CRGB::Blue;
+  if (anyButtonHeld() && anyAngleChanged()) {
+    Serial.println("Color changed");
+    if (leftKnob.angleChanged) {
+      color = CHSV(leftKnob.angle, SATURATION, BRIGHTNESS);
+    } else if (rightKnob.angleChanged) {
+      color = CHSV(rightKnob.angle, SATURATION, BRIGHTNESS);
+    }
+    // TODO send receiver color changed
+  } else if (leftKnob.angleChanged) {
+    Serial.println("Cursor moved horizontally");
+    // TODO send receiver cursor moved horizontally
+  } else if (rightKnob.angleChanged) {
+    Serial.println("Cursor moved vertically");
+    // TODO send receiver cursor moved vertically
+  }
+
+  FastLED.clear();
+  if (cursorOn || anyButtonHeld()) {
+    leftKnob.setLED(color);
+    rightKnob.setLED(color);
+  }
   FastLED.show();
 }
+
+bool anyAngleChanged() {
+  return leftKnob.angleChanged || rightKnob.angleChanged;
+}
+
+bool anyButtonClicked() {
+  return leftKnob.buttonClicked || rightKnob.buttonClicked;
+}
+
+bool anyButtonHeld() { return leftKnob.buttonHeld || rightKnob.buttonHeld; }

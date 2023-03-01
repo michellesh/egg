@@ -1,4 +1,5 @@
 #define MAX_CLICKS 40
+#define BUTTON_CLICK_MILLIS_THRESHOLD 500
 
 struct RotaryEncoder {
   int pinCLK;
@@ -7,12 +8,32 @@ struct RotaryEncoder {
   int angle;
   int clicks;
   int prevCLK;
+  int prevSW;
+  bool angleChanged;
+  bool buttonClicked;
+  bool buttonHeld;
+  unsigned long buttonPushedAtMillis;
+
+  CRGB *led;
+
+  void setLED(CHSV color) { led[0] = color; }
 
   void update() {
     int currentCLK = digitalRead(pinCLK);
+    int currentSW = digitalRead(pinSW);
 
-    // A pulse occurs if the previous and the current state differ
-    if (currentCLK != prevCLK) {
+    // If the button was clicked, store the millis time when it was clicked
+    if (prevSW == HIGH && currentSW == LOW) {
+      buttonPushedAtMillis = millis();
+    }
+    buttonClicked = prevSW == LOW && currentSW == HIGH &&
+                    timeSincePushed() < BUTTON_CLICK_MILLIS_THRESHOLD;
+    buttonHeld = prevSW == LOW && currentSW == LOW &&
+                 timeSincePushed() >= BUTTON_CLICK_MILLIS_THRESHOLD;
+
+    // A pulse occurs if the previous and the current CLK state differ
+    angleChanged = currentCLK != prevCLK;
+    if (angleChanged) {
       if (digitalRead(pinDT) != currentCLK) {
         clicks++;
         if (clicks >= MAX_CLICKS) {
@@ -26,11 +47,12 @@ struct RotaryEncoder {
       }
 
       // Set the rotation angle in degrees 0-360
-      angle = map(clicks, 0, MAX_CLICKS, 0, 360);
+      angle = map(clicks, 0, MAX_CLICKS, 0, 255);
     }
 
     prevCLK = currentCLK;
+    prevSW = currentSW;
   }
-};
 
-// bool isButtonPressed() { return digitalRead(ENCODER_SW) == LOW; }
+  unsigned long timeSincePushed() { return millis() - buttonPushedAtMillis; }
+};
