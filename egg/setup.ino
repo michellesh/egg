@@ -1,11 +1,7 @@
-void setupRotaryEncoders() {
-  pinMode(ENCODER_CLK, INPUT);
-  pinMode(ENCODER_DT, INPUT);
-  pinMode(ENCODER_SW, INPUT);
-}
-
 void setupLEDs() {
-  FastLED.addLeds<WS2812B, LED_PIN, GRB>(leds, NUM_LEDS);
+  FastLED.addLeds<WS2812B, LED_PIN_1, GRB>(leds, NUM_LEDS_PIN_1);
+  FastLED.addLeds<WS2812B, LED_PIN_2, GRB>(leds, NUM_LEDS_PIN_1,
+                                           NUM_LEDS_PIN_2);
   FastLED.setBrightness(MAX_BRIGHTNESS);
 }
 
