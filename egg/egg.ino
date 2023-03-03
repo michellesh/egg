@@ -1,7 +1,10 @@
 #include <FastLED.h>
+#include <esp_now.h>
+#include <WiFi.h>
 
 #include "Ring.h"
 #include "utils.h"
+#include "egg_shared.h"
 
 #define LED_PIN_1 14
 #define LED_PIN_2 13
@@ -15,6 +18,7 @@
 CRGB leds[NUM_LEDS];
 Ring rings[NUM_RINGS];
 int knobAngle = 0;
+msg data;
 
 void setup() {
   setupLEDs();
@@ -22,7 +26,40 @@ void setup() {
   Serial.begin(115200);
   delay(500);
 
+  WiFi.mode(WIFI_STA);
+
+  // Init ESP-NOW
+  if (esp_now_init() != ESP_OK) {
+    Serial.println("Error initializing ESP-NOW");
+    return;
+  }
+  esp_now_register_recv_cb(onDataRecv);
+
   setupRings();
+}
+
+// callback function that will be executed when data is received
+void onDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
+  memcpy(&data, incomingData, sizeof(data));
+  switch(data.action) {
+    case ACTION_CHANGE_COLOR:
+      Serial.print("Change color: ");
+      Serial.println(data.value);
+      break;
+    case ACTION_MOVE_HORIZONTAL:
+      Serial.print("Move horizontal: ");
+      Serial.println(data.value);
+      break;
+    case ACTION_MOVE_VERTICAL:
+      Serial.print("Move vertical: ");
+      Serial.println(data.value);
+      break;
+    case ACTION_TOGGLE_CURSOR:
+      Serial.print("Toggle cursor: ");
+      Serial.println(data.value);
+      break;
+  }
+  Serial.println();
 }
 
 bool closeDeg(float f1, float f2) { return int(abs(f2 - f1)) % 360 < 10; }
