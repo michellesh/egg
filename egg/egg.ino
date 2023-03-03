@@ -69,9 +69,9 @@ void onDataRecv(const uint8_t *mac, const uint8_t *incomingData, int len) {
 }
 
 bool closeDeg(float f1, float f2) {
-  return int(abs(f2 - f1)) % MAX_DEGREES < 10;
+  return int(abs(f2 - f1)) % MAX_DEGREES < CURSOR_SIZE;
 }
-bool closeHeight(float f1, float f2) { return abs(f2 - f1) < 10; }
+bool closeHeight(float f1, float f2) { return abs(f2 - f1) < CURSOR_SIZE; }
 
 void loop() {
   FastLED.clear();
@@ -80,7 +80,9 @@ void loop() {
     if (closeHeight(rings[r].height, height)) {
       for (int i = 0; i < rings[r].numLEDs; i++) {
         if (closeDeg(rings[r].deg[i], degree)) {
-          rings[r].leds[i] = CHSV(hue, 100, 255);
+          int dist = distance(degree, height, rings[r].deg[i], rings[r].height);
+          int brightness = map(dist, 0, CURSOR_SIZE * 2, 255, 0);
+          rings[r].leds[i] = CHSV(hue, 100, brightness);
         }
       }
     }
