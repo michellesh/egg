@@ -2,8 +2,11 @@
 #include <WiFi.h>
 #include <esp_now.h>
 
-#include "RotaryEncoder.h"
 #include "egg_shared.h"
+
+#include "RotaryEncoder.h"
+
+#define DEBUG
 
 // Pins
 #define LEFT_KNOB_CLK 25
@@ -21,6 +24,7 @@
 #define MAX_CLICKS 40
 #define SATURATION 100
 #define BRIGHTNESS 255
+#define MSG_BUFFER 50 // milliseconds to pause between sending messages
 
 bool cursorOn = true;
 CHSV color = CHSV(0, SATURATION, BRIGHTNESS);
@@ -57,8 +61,10 @@ void setup() {
   leftKnob.led = &leds[0];
   rightKnob.led = &leds[1];
 
+#ifdef DEBUG
   Serial.begin(115200);
   delay(500);
+#endif
 
   WiFi.mode(WIFI_STA);
 
@@ -79,13 +85,16 @@ void setup() {
   }
 }
 
-void send(msg m) {
-  esp_err_t result =
-      esp_now_send(broadcastAddressEgg, (uint8_t *)&m, sizeof(m));
-  if (result == ESP_OK) {
-    Serial.println("Sent with success");
-  } else {
-    Serial.println("Error sending the data");
+void send(msg &m) {
+  if (millis() - m.lastSentAt > MSG_BUFFER) {
+    esp_err_t result =
+        esp_now_send(broadcastAddressEgg, (uint8_t *)&m, sizeof(m));
+    if (result == ESP_OK) {
+      Serial.println("Sent with success");
+    } else {
+      Serial.println("Error sending the data");
+    }
+    m.lastSentAt = millis();
   }
 }
 
@@ -109,13 +118,22 @@ void loop() {
   if (anyButtonHeld() && anyAngleChanged()) {
     Serial.println("Color changed");
     if (leftKnob.angleChanged) {
-      color = CHSV(leftKnob.angle, SATURATION, BRIGHTNESS);
-      changeColor.value = leftKnob.angle;
+      int hue = map(leftKnob.angle, 0, KNOB_MAX, 0, 255);
+      color = CHSV(hue, SATURATION, BRIGHTNESS);
+      changeColor.value = hue;
     } else if (rightKnob.angleChanged) {
-      color = CHSV(rightKnob.angle, SATURATION, BRIGHTNESS);
-      changeColor.value = rightKnob.angle;
+      int hue = map(rightKnob.angle, 0, KNOB_MAX, 0, 255);
+      color = CHSV(hue, SATURATION, BRIGHTNESS);
+      changeColor.value = hue;
     }
     send(changeColor);
+    // If the color was changed and the cursor was off, turn it on
+    if (!cursorOn) {
+      delay(MSG_BUFFER);
+      cursorOn = true;
+      toggleCursor.value = cursorOn;
+      send(toggleCursor);
+    }
   } else if (leftKnob.angleChanged) {
     Serial.println("Cursor moved horizontally");
     moveHorizontal.value = leftKnob.angle;

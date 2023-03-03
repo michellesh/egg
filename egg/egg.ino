@@ -17,7 +17,10 @@
 
 CRGB leds[NUM_LEDS];
 Ring rings[NUM_RINGS];
-int knobAngle = 0;
+//int knobAngle = 0;
+float degree = 0;
+float height = 0;
+int hue = 0;
 msg data;
 
 void setup() {
@@ -45,14 +48,17 @@ void onDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
     case ACTION_CHANGE_COLOR:
       Serial.print("Change color: ");
       Serial.println(data.value);
+      hue = data.value;
       break;
     case ACTION_MOVE_HORIZONTAL:
       Serial.print("Move horizontal: ");
       Serial.println(data.value);
+      degree = data.value;
       break;
     case ACTION_MOVE_VERTICAL:
       Serial.print("Move vertical: ");
       Serial.println(data.value);
+      height = data.value;
       break;
     case ACTION_TOGGLE_CURSOR:
       Serial.print("Toggle cursor: ");
@@ -62,7 +68,7 @@ void onDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
   Serial.println();
 }
 
-bool closeDeg(float f1, float f2) { return int(abs(f2 - f1)) % 360 < 10; }
+bool closeDeg(float f1, float f2) { return int(abs(f2 - f1)) % KNOB_MAX < 10; }
 bool closeHeight(float f1, float f2) { return abs(f2 - f1) < 10; }
 
 void loop() {
@@ -76,27 +82,27 @@ void loop() {
   // Knob controls height
   //float degree = 0;
   //float height = mapf(knobAngle, 0, 180, 0, maxRingHeight);
+  */
 
   for (int r = 0; r < NUM_RINGS; r++) {
     if (closeHeight(rings[r].height, height)) {
       for (int i = 0; i < rings[r].numLEDs; i++) {
         if (closeDeg(rings[r].deg[i], degree)) {
-          rings[r].leds[i] = CHSV(i, 100, 255);
+          rings[r].leds[i] = CHSV(hue, 100, 255);
         }
       }
     }
   }
-  */
-  // for (int i = 0; i < NUM_LEDS; i++) {
-  //   leds[i] = CHSV(i, 100, 255);
-  // }
+
+  FastLED.setBrightness(MAX_BRIGHTNESS);
+  FastLED.show();
+}
+
+void testAllLEDsOn() {
   for (int r = 0; r < NUM_RINGS; r++) {
     int hue = map(r, 0, NUM_RINGS, 0, 255);
     for (int i = 0; i < rings[r].numLEDs; i++) {
       rings[r].leds[i] = CHSV(hue, 100, 255);
     }
   }
-
-  FastLED.setBrightness(MAX_BRIGHTNESS);
-  FastLED.show();
 }

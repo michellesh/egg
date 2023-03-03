@@ -9,7 +9,7 @@ float maxRingHeight = 75.7; // TODO will be 176.8
 // how many LEDs off is the beginning of the ring from where the LED strip
 // starts on that ring
 float ringOffset[] = {-0.5, -1.0, -1.5, -2.0, -2.5, -3.0, -3.5,
-                      -4.0, -4.5, -5.0, -5.5, -6.0, -6.5};
+                      -3.0, -2.5, -2.0, -1.5, -1.0, -0.5};
 
 // diameter of each ring
 float ringDiameter[] = {77.78,  102.3,  120.64, 132.59, 138.67, 139.63, 136.21,

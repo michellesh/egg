@@ -1,5 +1,7 @@
-#define MAX_CLICKS 40
-#define BUTTON_CLICK_MILLIS_THRESHOLD 500
+#define MAX_CLICKS                                                             \
+  40 // number of clicks to do one full revolution around the rotary encoders
+#define BUTTON_CLICK_THRESHOLD                                                 \
+  300 // milliseconds to wait before the button is held instead of just clicked
 
 struct RotaryEncoder {
   int pinCLK;
@@ -27,9 +29,9 @@ struct RotaryEncoder {
       buttonPushedAtMillis = millis();
     }
     buttonClicked = prevSW == LOW && currentSW == HIGH &&
-                    timeSincePushed() < BUTTON_CLICK_MILLIS_THRESHOLD;
+                    timeSincePushed() < BUTTON_CLICK_THRESHOLD;
     buttonHeld = prevSW == LOW && currentSW == LOW &&
-                 timeSincePushed() >= BUTTON_CLICK_MILLIS_THRESHOLD;
+                 timeSincePushed() >= BUTTON_CLICK_THRESHOLD;
 
     // A pulse occurs if the previous and the current CLK state differ
     angleChanged = currentCLK != prevCLK;
@@ -47,7 +49,7 @@ struct RotaryEncoder {
       }
 
       // Set the rotation angle in degrees 0-360
-      angle = map(clicks, 0, MAX_CLICKS, 0, 255);
+      angle = map(clicks, 0, MAX_CLICKS, 0, KNOB_MAX);
     }
 
     prevCLK = currentCLK;
