@@ -58,7 +58,8 @@ void onDataRecv(const uint8_t *mac, const uint8_t *incomingData, int len) {
   case ACTION_MOVE_VERTICAL:
     Serial.print("Move vertical: ");
     Serial.println(data.value);
-    height = data.value;
+    height = data.value * 2 % MAX_HEIGHT; // Feels more intuitive to move height
+                                          // at similar pace to degrees
     break;
   case ACTION_TOGGLE_CURSOR:
     Serial.print("Toggle cursor: ");
