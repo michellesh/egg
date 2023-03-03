@@ -27,7 +27,7 @@
 #define MSG_BUFFER 50 // milliseconds to pause between sending messages
 
 bool cursorOn = true;
-CHSV color = CHSV(0, SATURATION, BRIGHTNESS);
+CHSV color = CHSV(INIT_HUE, SATURATION, BRIGHTNESS);
 
 RotaryEncoder leftKnob = {
     LEFT_KNOB_CLK, LEFT_KNOB_DT, LEFT_KNOB_SW, 0, 0, 0, 0};
@@ -37,10 +37,10 @@ RotaryEncoder swivel = {SWIVEL_CLK, SWIVEL_DT, SWIVEL_SW, 0, 0, 0, 0};
 
 CRGB leds[2];
 
-msg changeColor = {ACTION_CHANGE_COLOR};
-msg moveHorizontal = {ACTION_MOVE_HORIZONTAL};
-msg moveVertical = {ACTION_MOVE_VERTICAL};
-msg toggleCursor = {ACTION_TOGGLE_CURSOR};
+msg changeColor = {ACTION_CHANGE_COLOR, INIT_HUE, INIT_HUE};
+msg moveHorizontal = {ACTION_MOVE_HORIZONTAL, INIT_DEGREES, INIT_DEGREES};
+msg moveVertical = {ACTION_MOVE_VERTICAL, INIT_HEIGHT, INIT_HEIGHT};
+msg toggleCursor = {ACTION_TOGGLE_CURSOR, 1, 1};
 
 esp_now_peer_info_t peerInfo;
 
@@ -83,6 +83,12 @@ void setup() {
     Serial.println("Failed to add peer");
     return;
   }
+
+  // Send initial state to egg
+  send(changeColor);
+  send(moveHorizontal);
+  send(moveVertical);
+  send(toggleCursor);
 }
 
 bool send(msg &m) {

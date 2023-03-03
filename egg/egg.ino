@@ -14,13 +14,13 @@
 
 #define NUM_RINGS 13
 #define MAX_BRIGHTNESS 100 // 255 uses too much power for all LEDs
+#define CURSOR_SIZE 20
 
 CRGB leds[NUM_LEDS];
 Ring rings[NUM_RINGS];
-// int knobAngle = 0;
-float degree = 0;
-float height = 0;
-int hue = 0;
+float degree = INIT_DEGREES;
+float height = INIT_HEIGHT;
+int hue = INIT_HUE;
 msg data;
 
 void setup() {
@@ -75,16 +75,6 @@ bool closeHeight(float f1, float f2) { return abs(f2 - f1) < 10; }
 
 void loop() {
   FastLED.clear();
-
-  /*
-  // Knob controls degrees
-  float degree = knobAngle;
-  float height = ringHeight[3];
-
-  // Knob controls height
-  //float degree = 0;
-  //float height = mapf(knobAngle, 0, 180, 0, maxRingHeight);
-  */
 
   for (int r = 0; r < NUM_RINGS; r++) {
     if (closeHeight(rings[r].height, height)) {
