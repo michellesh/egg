@@ -7,11 +7,10 @@ struct RotaryEncoder {
   int pinCLK;
   int pinDT;
   int pinSW;
-  int angle;
+
   int clicks;
   int prevCLK;
   int prevSW;
-  bool angleChanged;
   bool buttonClicked;
   bool buttonHeld;
   unsigned long buttonPushedAtMillis;
@@ -19,6 +18,8 @@ struct RotaryEncoder {
   CRGB *led;
 
   void setLED(CHSV color) { led[0] = color; }
+
+  void resetClicks() { clicks = 0; }
 
   void update() {
     int currentCLK = digitalRead(pinCLK);
@@ -34,8 +35,7 @@ struct RotaryEncoder {
                  timeSincePushed() >= BUTTON_CLICK_THRESHOLD;
 
     // A pulse occurs if the previous and the current CLK state differ
-    angleChanged = currentCLK != prevCLK;
-    if (angleChanged) {
+    if (currentCLK != prevCLK) {
       if (digitalRead(pinDT) != currentCLK) {
         clicks++;
         if (clicks >= MAX_CLICKS) {
@@ -47,9 +47,6 @@ struct RotaryEncoder {
           clicks = MAX_CLICKS;
         }
       }
-
-      // Set the rotation angle in degrees 0-360
-      angle = map(clicks, 0, MAX_CLICKS, 0, KNOB_MAX);
     }
 
     prevCLK = currentCLK;

@@ -85,17 +85,19 @@ void setup() {
   }
 }
 
-void send(msg &m) {
+bool send(msg &m) {
   if (millis() - m.lastSentAt > MSG_BUFFER) {
     esp_err_t result =
         esp_now_send(broadcastAddressEgg, (uint8_t *)&m, sizeof(m));
     if (result == ESP_OK) {
       Serial.println("Sent with success");
+      m.lastSentAt = millis();
+      return true;
     } else {
       Serial.println("Error sending the data");
     }
-    m.lastSentAt = millis();
   }
+  return false;
 }
 
 void loop() {
@@ -115,33 +117,75 @@ void loop() {
     send(toggleCursor);
   }
 
-  if (anyButtonHeld() && anyAngleChanged()) {
-    Serial.println("Color changed");
-    if (leftKnob.angleChanged) {
-      int hue = map(leftKnob.angle, 0, KNOB_MAX, 0, 255);
-      color = CHSV(hue, SATURATION, BRIGHTNESS);
+  if (leftKnob.buttonHeld) {
+    int hue = (changeColor.sentValue + clicksToHue(leftKnob.clicks)) % MAX_HUE;
+    if (hue != changeColor.sentValue) {
       changeColor.value = hue;
-    } else if (rightKnob.angleChanged) {
-      int hue = map(rightKnob.angle, 0, KNOB_MAX, 0, 255);
-      color = CHSV(hue, SATURATION, BRIGHTNESS);
+      bool sent = send(changeColor);
+      if (sent) {
+        leftKnob.resetClicks();
+        changeColor.sentValue = changeColor.value;
+        color = CHSV(hue, SATURATION, BRIGHTNESS);
+
+        // If the color was changed and the cursor was off, turn it on
+        if (!cursorOn) {
+          delay(MSG_BUFFER);
+          cursorOn = true;
+          toggleCursor.value = cursorOn;
+          send(toggleCursor);
+        }
+      }
+      Serial.println("Color changed");
+    }
+  }
+
+  if (rightKnob.buttonHeld) {
+    int hue = (changeColor.sentValue + clicksToHue(rightKnob.clicks)) % MAX_HUE;
+    if (hue != changeColor.sentValue) {
       changeColor.value = hue;
+      bool sent = send(changeColor);
+      if (sent) {
+        rightKnob.resetClicks();
+        changeColor.sentValue = changeColor.value;
+        color = CHSV(hue, SATURATION, BRIGHTNESS);
+
+        // If the color was changed and the cursor was off, turn it on
+        if (!cursorOn) {
+          delay(MSG_BUFFER);
+          cursorOn = true;
+          toggleCursor.value = cursorOn;
+          send(toggleCursor);
+        }
+      }
+      Serial.println("Color changed");
     }
-    send(changeColor);
-    // If the color was changed and the cursor was off, turn it on
-    if (!cursorOn) {
-      delay(MSG_BUFFER);
-      cursorOn = true;
-      toggleCursor.value = cursorOn;
-      send(toggleCursor);
+  }
+
+  int leftKnobAngle =
+      (moveHorizontal.sentValue + clicksToDegrees(leftKnob.clicks)) %
+      MAX_DEGREES;
+  if (leftKnobAngle != moveHorizontal.sentValue) {
+    moveHorizontal.value = leftKnobAngle;
+    bool sent = send(moveHorizontal);
+    if (sent) {
+      leftKnob.resetClicks();
+      moveHorizontal.sentValue = moveHorizontal.value;
     }
-  } else if (leftKnob.angleChanged) {
-    Serial.println("Cursor moved horizontally");
-    moveHorizontal.value = leftKnob.angle;
-    send(moveHorizontal);
-  } else if (rightKnob.angleChanged) {
-    Serial.println("Cursor moved vertically");
-    moveVertical.value = rightKnob.angle;
-    send(moveVertical);
+    Serial.print("Cursor moved horizontally ");
+    Serial.println(moveHorizontal.value);
+  }
+
+  int rightKnobAngle =
+      (moveVertical.sentValue + clicksToHeight(rightKnob.clicks)) % MAX_HEIGHT;
+  if (rightKnobAngle != moveVertical.sentValue) {
+    moveVertical.value = rightKnobAngle;
+    bool sent = send(moveVertical);
+    if (sent) {
+      rightKnob.resetClicks();
+      moveVertical.sentValue = moveVertical.value;
+    }
+    Serial.print("Cursor moved vertically ");
+    Serial.println(moveVertical.value);
   }
 
   FastLED.clear();
@@ -152,9 +196,15 @@ void loop() {
   FastLED.show();
 }
 
-bool anyAngleChanged() {
-  return leftKnob.angleChanged || rightKnob.angleChanged;
+int clicksToDegrees(int clicks) {
+  return map(clicks, 0, MAX_CLICKS, 0, MAX_DEGREES);
 }
+
+int clicksToHeight(int clicks) {
+  return map(clicks, 0, MAX_CLICKS, 0, MAX_HEIGHT);
+}
+
+int clicksToHue(int clicks) { return map(clicks, 0, MAX_CLICKS, 0, MAX_HUE); }
 
 bool anyButtonClicked() {
   return leftKnob.buttonClicked || rightKnob.buttonClicked;

@@ -1,10 +1,10 @@
 #include <FastLED.h>
-#include <esp_now.h>
 #include <WiFi.h>
+#include <esp_now.h>
 
 #include "Ring.h"
-#include "utils.h"
 #include "egg_shared.h"
+#include "utils.h"
 
 #define LED_PIN_1 14
 #define LED_PIN_2 13
@@ -17,7 +17,7 @@
 
 CRGB leds[NUM_LEDS];
 Ring rings[NUM_RINGS];
-//int knobAngle = 0;
+// int knobAngle = 0;
 float degree = 0;
 float height = 0;
 int hue = 0;
@@ -42,33 +42,35 @@ void setup() {
 }
 
 // callback function that will be executed when data is received
-void onDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
+void onDataRecv(const uint8_t *mac, const uint8_t *incomingData, int len) {
   memcpy(&data, incomingData, sizeof(data));
-  switch(data.action) {
-    case ACTION_CHANGE_COLOR:
-      Serial.print("Change color: ");
-      Serial.println(data.value);
-      hue = data.value;
-      break;
-    case ACTION_MOVE_HORIZONTAL:
-      Serial.print("Move horizontal: ");
-      Serial.println(data.value);
-      degree = data.value;
-      break;
-    case ACTION_MOVE_VERTICAL:
-      Serial.print("Move vertical: ");
-      Serial.println(data.value);
-      height = data.value;
-      break;
-    case ACTION_TOGGLE_CURSOR:
-      Serial.print("Toggle cursor: ");
-      Serial.println(data.value);
-      break;
+  switch (data.action) {
+  case ACTION_CHANGE_COLOR:
+    Serial.print("Change color: ");
+    Serial.println(data.value);
+    hue = data.value;
+    break;
+  case ACTION_MOVE_HORIZONTAL:
+    Serial.print("Move horizontal: ");
+    Serial.println(data.value);
+    degree = data.value;
+    break;
+  case ACTION_MOVE_VERTICAL:
+    Serial.print("Move vertical: ");
+    Serial.println(data.value);
+    height = data.value;
+    break;
+  case ACTION_TOGGLE_CURSOR:
+    Serial.print("Toggle cursor: ");
+    Serial.println(data.value);
+    break;
   }
   Serial.println();
 }
 
-bool closeDeg(float f1, float f2) { return int(abs(f2 - f1)) % KNOB_MAX < 10; }
+bool closeDeg(float f1, float f2) {
+  return int(abs(f2 - f1)) % MAX_DEGREES < 10;
+}
 bool closeHeight(float f1, float f2) { return abs(f2 - f1) < 10; }
 
 void loop() {
