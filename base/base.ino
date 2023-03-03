@@ -1,6 +1,9 @@
 #include <FastLED.h>
+#include <WiFi.h>
+#include <esp_now.h>
 
 #include "RotaryEncoder.h"
+#include "egg_shared.h"
 
 // Pins
 #define LEFT_KNOB_CLK 25
@@ -19,6 +22,11 @@
 #define SATURATION 100
 #define BRIGHTNESS 255
 
+#define ACTION_CHANGE_COLOR 0
+#define ACTION_MOVE_HORIZONTAL 1
+#define ACTION_MOVE_VERTICAL 2
+#define ACTION_TOGGLE_CURSOR 3
+
 bool cursorOn = true;
 CHSV color = CHSV(0, SATURATION, BRIGHTNESS);
 
@@ -29,6 +37,13 @@ RotaryEncoder rightKnob = {
 RotaryEncoder swivel = {SWIVEL_CLK, SWIVEL_DT, SWIVEL_SW, 0, 0, 0, 0};
 
 CRGB leds[2];
+
+msg changeColor = {ACTION_CHANGE_COLOR};
+msg moveHorizontal = {ACTION_MOVE_HORIZONTAL};
+msg moveVertical = {ACTION_MOVE_VERTICAL};
+msg toggleCursor = {ACTION_TOGGLE_CURSOR};
+
+esp_now_peer_info_t peerInfo;
 
 void setup() {
   pinMode(LEFT_KNOB_CLK, INPUT);
@@ -49,6 +64,34 @@ void setup() {
 
   Serial.begin(115200);
   delay(500);
+
+  WiFi.mode(WIFI_STA);
+
+  if (esp_now_init() != ESP_OK) {
+    Serial.println("Error initializing ESP-NOW");
+    return;
+  }
+
+  // Register peer
+  memcpy(peerInfo.peer_addr, broadcastAddressEgg, 6);
+  peerInfo.channel = 0;
+  peerInfo.encrypt = false;
+
+  // Add peer
+  if (esp_now_add_peer(&peerInfo) != ESP_OK) {
+    Serial.println("Failed to add peer");
+    return;
+  }
+}
+
+void send(msg m) {
+  esp_err_t result =
+      esp_now_send(broadcastAddressEgg, (uint8_t *)&m, sizeof(m));
+  if (result == ESP_OK) {
+    Serial.println("Sent with success");
+  } else {
+    Serial.println("Error sending the data");
+  }
 }
 
 void loop() {
@@ -64,23 +107,28 @@ void loop() {
     } else {
       Serial.println("OFF");
     }
-    // TODO send receiver toggle cursor on/off
+    toggleCursor.value = cursorOn;
+    send(toggleCursor);
   }
 
   if (anyButtonHeld() && anyAngleChanged()) {
     Serial.println("Color changed");
     if (leftKnob.angleChanged) {
       color = CHSV(leftKnob.angle, SATURATION, BRIGHTNESS);
+      changeColor.value = leftKnob.angle;
     } else if (rightKnob.angleChanged) {
       color = CHSV(rightKnob.angle, SATURATION, BRIGHTNESS);
+      changeColor.value = rightKnob.angle;
     }
-    // TODO send receiver color changed
+    send(changeColor);
   } else if (leftKnob.angleChanged) {
     Serial.println("Cursor moved horizontally");
-    // TODO send receiver cursor moved horizontally
+    moveHorizontal.value = leftKnob.angle;
+    send(moveHorizontal);
   } else if (rightKnob.angleChanged) {
     Serial.println("Cursor moved vertically");
-    // TODO send receiver cursor moved vertically
+    moveVertical.value = rightKnob.angle;
+    send(moveVertical);
   }
 
   FastLED.clear();

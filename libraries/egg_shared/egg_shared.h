@@ -3,3 +3,8 @@ uint8_t broadcastAddressBase[] = {0xC8, 0xF0, 0x9E, 0x9F, 0xAC, 0x18};
 
 char macAddressEgg[] = "CC:DB:A7:02:08:5C";
 char macAddressBase[] = "C8:F0:9E:9F:AC:18";
+
+typedef struct msg {
+  int action;
+  int value;
+} msg;
