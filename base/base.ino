@@ -26,7 +26,7 @@
 #define BRIGHTNESS 255
 #define MSG_BUFFER 50 // milliseconds to pause between sending messages
 
-bool cursorOn = true;
+bool cursorOn = INIT_CURSOR_ON;
 CHSV color = CHSV(INIT_HUE, SATURATION, BRIGHTNESS);
 
 RotaryEncoder leftKnob = {
@@ -41,6 +41,7 @@ msg changeColor = {ACTION_CHANGE_COLOR, INIT_HUE, INIT_HUE};
 msg moveHorizontal = {ACTION_MOVE_HORIZONTAL, INIT_DEGREES, INIT_DEGREES};
 msg moveVertical = {ACTION_MOVE_VERTICAL, INIT_HEIGHT, INIT_HEIGHT};
 msg toggleCursor = {ACTION_TOGGLE_CURSOR, 1, 1};
+msg clearCanvas = {ACTION_CLEAR_CANVAS};
 
 esp_now_peer_info_t peerInfo;
 
@@ -92,12 +93,13 @@ void setup() {
 }
 
 bool send(msg &m) {
-  if (millis() - m.lastSentAt > MSG_BUFFER) {
+  if (millis() > 1000 && millis() - m.lastSentAt > MSG_BUFFER) {
     esp_err_t result =
         esp_now_send(broadcastAddressEgg, (uint8_t *)&m, sizeof(m));
     if (result == ESP_OK) {
-      Serial.println("Sent with success");
+      Serial.print("Sent with success at ");
       m.lastSentAt = millis();
+      Serial.println(m.lastSentAt);
       return true;
     } else {
       Serial.println("Error sending the data");
@@ -110,6 +112,15 @@ void loop() {
   leftKnob.update();
   rightKnob.update();
   swivel.update();
+
+  if (bothButtonsHeld()) {
+    Serial.print("Clear canvas");
+    send(clearCanvas);
+    delay(MSG_BUFFER);
+    cursorOn = false;
+    toggleCursor.value = cursorOn;
+    // send(toggleCursor); // egg has to set this itself after clear canvas
+  }
 
   if (anyButtonClicked()) {
     Serial.print("Cursor toggled ");
@@ -217,3 +228,5 @@ bool anyButtonClicked() {
 }
 
 bool anyButtonHeld() { return leftKnob.buttonHeld || rightKnob.buttonHeld; }
+
+bool bothButtonsHeld() { return leftKnob.buttonHeld && rightKnob.buttonHeld; }

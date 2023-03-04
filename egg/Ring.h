@@ -22,5 +22,6 @@ struct Ring {
   float diameter;
 
   CRGB *leds; // array of LEDs in this ring
+  CHSV *canvas; // array of LEDs in this ring
   float *deg; // degree position of each LED in this ring
 };
