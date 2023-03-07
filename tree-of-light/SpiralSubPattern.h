@@ -10,7 +10,7 @@ class SpiralSubPattern : public SubPattern {
   void _showRubberBandWorm() {
     int16_t offset = sinwave(-90, 90, 100);
     int16_t width = sinwave(-180, 180, 100);
-    int16_t speed = sinwave(3, 6);
+    int16_t speed = sinwave(1, 4);
 
     for (uint8_t i = 0; i < NUM_RINGS; i++) {
       _spirals[0].setSpeed(speed);
@@ -21,8 +21,8 @@ class SpiralSubPattern : public SubPattern {
   }
 
   void _showRubberBandNoAnchor() {
-    int16_t angle = sinwave(-200, 200, 200);
-    int16_t offset = sinwave(-90, 90, 200);
+    int16_t angle = sinwave(0, 200, 200);
+    int16_t offset = sinwave(-30, 30, 200);
     int16_t width = sinwave(-180, 180, 200);
 
     for (uint8_t i = 0; i < NUM_RINGS; i++) {

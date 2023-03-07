@@ -43,7 +43,7 @@ class Spiral : public Pattern {
   static constexpr Range WIDTH = {
       10, 90, 90};  // How many degrees along the circumference at
                     // the current angle to light up
-  static constexpr Range SPEED = {1, 10, 3};  // How many degrees to add to the
+  static constexpr Range SPEED = {1, 10, 1};  // How many degrees to add to the
                                               // current angle each time
   static constexpr Range RING_OFFSET = {
       20, 90, 30};  // How many degrees to increase angle per

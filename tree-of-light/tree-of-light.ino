@@ -48,9 +48,9 @@ SubPattern *activePatterns[] = {
   //&bloomEndSame,
   //&bloomUpward,
   //&bloomDownward,
-  &rubberBandWorm,
+  //&rubberBandWorm,
   //&rubberBandNoAnchor,
-  //&rubberBandAnchored,
+  &rubberBandAnchored,
   //&growingSpirals,
   //&basicSpiralRotation,
   //&continuousSpiral
