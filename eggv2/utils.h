@@ -6,3 +6,7 @@ float mapf(float value, float inMin, float inMax, float outMin, float outMax) {
 float distance(float x1, float y1, float x2, float y2) {
   return (float)sqrt(pow((x1 - x2), 2) + pow((y1 - y2), 2));
 }
+
+bool isBetween(int value, int min, int max, bool inclusive = false) {
+  return inclusive ? value >= min && value <= max : value > min && value < max;
+}

@@ -30,8 +30,8 @@ void setup() {
 void loop() {
   FastLED.clear();
 
-  twinkle();
-  // testAllLEDsOn();
+  spiral();
+  // twinkle();
 
   FastLED.setBrightness(MAX_BRIGHTNESS);
   FastLED.show();
