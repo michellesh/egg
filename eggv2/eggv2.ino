@@ -30,15 +30,17 @@ void setup() {
 
   setupRings();
   setupBlobs();
+  setupStarfield();
 }
 
 void loop() {
-  fadeToBlackBy(leds, NUM_LEDS, 20);
+  fadeToBlackBy(leds, NUM_LEDS, 1);
   //FastLED.clear();
 
   // spiral();
-  // twinkle();
-  metaballs();
+  twinkle();
+  // metaballs();
+  // starfield();
 
   FastLED.setBrightness(MAX_BRIGHTNESS);
   FastLED.show();

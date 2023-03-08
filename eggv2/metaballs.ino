@@ -25,7 +25,7 @@ struct Blob {
   }
 
   void update() {
-    brightness = constrain(brightness + 5, 0, 255);
+    brightness = constrain(brightness + 1, 0, 255);
 
     angle = int(angle + speedHorizontal + 360) % 360;
 
