@@ -5,7 +5,6 @@ struct Spiral {
   int width;
   int ringOffset;
   int angle;
-  int hue;
 
   void update() {
     // Increment the angle. After 360 degrees, start over at 0 degrees
@@ -38,23 +37,24 @@ struct Spiral {
 Spiral spirals[NUM_SPIRALS];
 
 void setupSpirals() {
-  spirals[0] = {1, 120, 40, 0, HUE_BLUE};
-  spirals[1] = {1, 120, 40, 120, HUE_RED};
-  spirals[2] = {1, 120, 40, 270, HUE_PURPLE};
+  spirals[0] = {1, 120, 40, 0};
+  spirals[1] = {1, 120, 40, 120};
+  spirals[2] = {1, 120, 40, 240};
 }
 
 void spiral() {
   for (int i = 0; i < NUM_RINGS; i++) {
     for (int j = 0; j < rings[i].numLEDs; j++) {
       int sum = 0;
-      int hue = 0;
+      CRGB color;
       for (int k = 0; k < NUM_SPIRALS; k++) {
         int brightness = spirals[k].getBrightness(i, j);
         sum += brightness;
-        hue = brightness > 0 ? spirals[k].hue : hue;
+        CRGB spiralColor = palette.mapToColor(k, 0, NUM_SPIRALS);
+        color = brightness > 0 ? spiralColor : color;
       }
       sum = constrain(sum, 0, 255);
-      rings[i].leds[j] = CHSV(hue, 100, sum);
+      rings[i].leds[j] = color.nscale8(sum);
     }
   }
 

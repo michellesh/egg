@@ -1,11 +1,11 @@
 #define MAX_PALETTE_INDEX 245
 
 class Palette {
- private:
+private:
   CRGBPalette16 _currentPalette = *(activePalettes[0]);
   CRGBPalette16 _targetPalette = *(activePalettes[0]);
   uint8_t _activeColorMode = VERTICAL_GRADIENT;
-  uint8_t _secondsPerPalette = 30;
+  uint8_t _secondsPerPalette = 10;
 
   void _setNextColorPalette() {
     const uint8_t numberOfPalettes =
@@ -16,7 +16,7 @@ class Palette {
     _targetPalette = *(activePalettes[whichPalette]);
   }
 
- public:
+public:
   static const uint8_t SOLID = 0;
   static const uint8_t VERTICAL_GRADIENT = 1;
   static const uint8_t ANGLE_GRADIENT = 3;
@@ -33,6 +33,11 @@ class Palette {
     }
   }
 
+  CRGB mapToColor(int value, int fromLow, int fromHigh) {
+    uint8_t paletteIndex = map(value, fromLow, fromHigh, 0, MAX_PALETTE_INDEX);
+    return ColorFromPalette(_currentPalette, paletteIndex);
+  }
+
   CRGB getColor(uint8_t i) {
     uint8_t paletteIndex = map(i, 0, NUM_RINGS - 1, 0, MAX_PALETTE_INDEX);
     return ColorFromPalette(_currentPalette, paletteIndex);
@@ -41,16 +46,16 @@ class Palette {
   CRGB getColor(uint8_t i, uint8_t j) {
     uint8_t paletteIndex = 0;
     switch (_activeColorMode) {
-      case VERTICAL_GRADIENT: {
-        paletteIndex = map(i, 0, NUM_RINGS - 1, 0, MAX_PALETTE_INDEX);
-        break;
-      }
-      case ANGLE_GRADIENT: {
-        paletteIndex = map(rings[i].angle[j], 0, 360, 0, MAX_PALETTE_INDEX);
-        break;
-      }
-      default:
-        break;
+    case VERTICAL_GRADIENT: {
+      paletteIndex = map(i, 0, NUM_RINGS - 1, 0, MAX_PALETTE_INDEX);
+      break;
+    }
+    case ANGLE_GRADIENT: {
+      paletteIndex = map(rings[i].angle[j], 0, 360, 0, MAX_PALETTE_INDEX);
+      break;
+    }
+    default:
+      break;
     }
     return ColorFromPalette(_currentPalette, paletteIndex);
   }
