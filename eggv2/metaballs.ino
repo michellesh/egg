@@ -27,7 +27,7 @@ void setupBlobs() {
   for (int k = 0; k < NUM_BLOBS; k++) {
     float angle = random(0, 360);
     float height = random(0, MAX_RING_HEIGHT);
-    blobs[k] = {20, angle, height, 0.5, 0.5};
+    blobs[k] = {50, angle, height, 0.5, 0.5};
   }
 }
 
@@ -41,11 +41,14 @@ void metaballs() {
       for (int k = 0; k < NUM_BLOBS; k++) {
         dist = distance(rings[r].angle[i], rings[r].height, blobs[k].angle,
                         blobs[k].height);
-        sum += 50 * blobs[k].radius / dist;
+        //sum += 50 * blobs[k].radius / dist;
+        if (dist < blobs[k].radius) {
+          sum += map(dist, 0, blobs[k].radius, 255, 0);
+        }
       }
 
       sum = constrain(sum, 0, 255);
-      sum = sum < 50 ? 0 : sum;
+      //sum = sum < 50 ? 0 : sum;
       rings[r].leds[i] = CHSV(HUE_BLUE, 100, sum);
     }
   }
