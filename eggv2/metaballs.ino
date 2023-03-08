@@ -1,33 +1,49 @@
-#define NUM_BLOBS 3
+#define NUM_BLOBS 15
 
 struct Blob {
-  float radius;
+  int brightness;
+  float size;
   float angle;
   float height;
   float speedHorizontal;
   float speedVertical;
 
+  void reset() {
+    brightness = 0;
+    size = random(30, 50);
+    angle = random(0, 360);
+    height = random(0, MAX_RING_HEIGHT);
+
+    speedVertical = _randomBlobSpeed();
+    speedHorizontal = _randomBlobSpeed();
+  }
+
+  float _randomBlobSpeed() {
+    bool reverse = random(0, 1);
+    float speed = float(random(3, 7)) / 10;
+    return reverse ? speed * -1 : speed;
+  }
+
   void update() {
-    angle += speedHorizontal;
+    brightness = constrain(brightness + 5, 0, 255);
+
+    angle = int(angle + speedHorizontal + 360) % 360;
+
     height += speedVertical;
-    if (angle > 360 || angle < 0) {
-      speedHorizontal *= -1;
-    }
-    if (height > MAX_RING_HEIGHT || angle < 0) {
-      speedVertical *= -1;
+    if (height > size + MAX_RING_HEIGHT || height < -size) {
+      reset();
     }
   }
 };
 
-Blob b = {20, 180, 50, 0.5, 0.5};
-Blob b2 = {20, 90, 100, 0.5, 0.5};
-Blob blobs[NUM_BLOBS];// = {b, b2};
+Blob blobs[NUM_BLOBS];
 
 void setupBlobs() {
   for (int k = 0; k < NUM_BLOBS; k++) {
-    float angle = random(0, 360);
-    float height = random(0, MAX_RING_HEIGHT);
-    blobs[k] = {50, angle, height, 0.5, 0.5};
+    Blob b;
+    b.reset();
+    b.brightness = 255;
+    blobs[k] = b;
   }
 }
 
@@ -39,21 +55,28 @@ void metaballs() {
       float dist;
 
       for (int k = 0; k < NUM_BLOBS; k++) {
+        // TODO need to also check angles that wrap all the way around 360
         dist = distance(rings[r].angle[i], rings[r].height, blobs[k].angle,
                         blobs[k].height);
-        //sum += 50 * blobs[k].radius / dist;
-        if (dist < blobs[k].radius) {
-          sum += map(dist, 0, blobs[k].radius, 255, 0);
+        if (dist < blobs[k].size) {
+          int b = map(dist, 0, blobs[k].size, 255, 0);
+          sum += constrain(b, 0, blobs[k].brightness);
         }
       }
 
       sum = constrain(sum, 0, 255);
-      //sum = sum < 50 ? 0 : sum;
       rings[r].leds[i] = CHSV(HUE_BLUE, 100, sum);
     }
   }
 
   for (int k = 0; k < NUM_BLOBS; k++) {
     blobs[k].update();
+  }
+
+  EVERY_N_MILLISECONDS(500) {
+    Serial.print(blobs[0].angle);
+    Serial.print(" ");
+    Serial.print(blobs[0].height);
+    Serial.println();
   }
 }
