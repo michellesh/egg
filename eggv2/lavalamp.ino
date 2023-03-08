@@ -52,7 +52,8 @@ void lavalamp() {
       }
 
       sum = constrain(sum, 0, 255);
-      rings[r].leds[i] = CHSV(HUE_BLUE, 100, sum);
+      CRGB color = palette.getColor(r, i);
+      rings[r].leds[i] = color.nscale8(sum);
     }
   }
 

@@ -6,6 +6,7 @@ unsigned long ticks = 0;
 // clang-format off
 #include "Ring.h"
 #include "utils.h"
+#include "colors.h"
 // clang-format on
 
 #define LED_PIN_1 13
@@ -19,6 +20,9 @@ unsigned long ticks = 0;
 
 Ring rings[NUM_RINGS];
 CRGB leds[NUM_LEDS];
+
+#include "Palette.h"
+Palette palette;
 
 void setup() {
   setupLEDs();
@@ -36,6 +40,7 @@ void setup() {
 void loop() {
   fadeToBlackBy(leds, NUM_LEDS, 1);
   //FastLED.clear();
+  palette.cycle();
 
   // spiral();
   // twinkle();
