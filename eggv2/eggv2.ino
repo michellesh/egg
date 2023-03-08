@@ -32,6 +32,7 @@ Palette palette;
 #include "SpiralSubPattern.h"
 
 SpiralSubPattern continuousSpiral(SpiralSubPattern::CONTINUOUS_SPIRAL);
+SpiralSubPattern rubberBandAnchored(SpiralSubPattern::RUBBER_BAND_ANCHORED);
 
 void setup() {
   setupLEDs();
@@ -47,17 +48,13 @@ void setup() {
   setupSpirals();
 }
 
-int sinRingOffset;
-
 void loop() {
   //fadeToBlackBy(leds, NUM_LEDS, 1);
   FastLED.clear();
   palette.cycle();
 
-  sinRingOffset = sawtooth(0, 360, 1000);
-  Serial.println(sinRingOffset);
-
-  continuousSpiral.show();
+  //continuousSpiral.show();
+  rubberBandAnchored.show();
 
   // spiral(sinRingOffset);
   // twinkle();

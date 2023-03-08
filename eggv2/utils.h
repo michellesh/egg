@@ -18,8 +18,19 @@ float sinwave(float minValue, float maxValue, unsigned long waveLength = 50,
               minValue, maxValue);
 }
 
+float cosSawtooth(float minValue, float maxValue,
+                  unsigned long waveLength = 50) {
+  int8_t s = ticks % (waveLength * 2) < waveLength ? -1 : 1;
+  return mapf(s * (cos((float)ticks * PI / waveLength)), -1, 1, minValue,
+              maxValue);
+}
+
 float sawtooth(float minValue, float maxValue, unsigned long waveLength = 50,
                unsigned long waveLengthOffset = 0) {
   float t = (float)(ticks + waveLengthOffset) / waveLength;
   return mapf(t - floor(t), 0, 1, minValue, maxValue);
+}
+
+float square(float minValue, float maxValue, unsigned long waveLength = 50) {
+  return ticks % (waveLength * 2) < waveLength ? minValue : maxValue;
 }
