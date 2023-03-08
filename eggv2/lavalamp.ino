@@ -1,35 +1,26 @@
-#define NUM_BLOBS 15
+#define NUM_BLOBS 20
 
 struct Blob {
-  int brightness;
   float size;
   float angle;
   float height;
-  float speedHorizontal;
-  float speedVertical;
+  float speed;
 
   void reset() {
-    brightness = 0;
-    size = random(30, 50);
+    size = random(25, 40);
     angle = random(0, 360);
-    height = random(0, MAX_RING_HEIGHT);
-
-    speedVertical = _randomBlobSpeed();
-    speedHorizontal = _randomBlobSpeed();
+    speed = _getRandomSpeed();
+    height = speed > 0 ? -size : MAX_RING_HEIGHT + size;
   }
 
-  float _randomBlobSpeed() {
-    bool reverse = random(0, 1);
-    float speed = float(random(3, 7)) / 10;
-    return reverse ? speed * -1 : speed;
+  float _getRandomSpeed() {
+    bool reverse = random(0, 2);
+    float _speed = float(random(5, 10)) / 10;
+    return reverse ? _speed * -1 : _speed;
   }
 
   void update() {
-    brightness = constrain(brightness + 1, 0, 255);
-
-    angle = int(angle + speedHorizontal + 360) % 360;
-
-    height += speedVertical;
+    height += speed;
     if (height > size + MAX_RING_HEIGHT || height < -size) {
       reset();
     }
@@ -42,25 +33,21 @@ void setupBlobs() {
   for (int k = 0; k < NUM_BLOBS; k++) {
     Blob b;
     b.reset();
-    b.brightness = 255;
     blobs[k] = b;
   }
 }
 
-void metaballs() {
+void lavalamp() {
   for (int r = 0; r < NUM_RINGS; r++) {
     for (int i = 0; i < rings[r].numLEDs; i++) {
 
       int sum = 0;
       float dist;
-
       for (int k = 0; k < NUM_BLOBS; k++) {
-        // TODO need to also check angles that wrap all the way around 360
         dist = distance(rings[r].angle[i], rings[r].height, blobs[k].angle,
                         blobs[k].height);
         if (dist < blobs[k].size) {
-          int b = map(dist, 0, blobs[k].size, 255, 0);
-          sum += constrain(b, 0, blobs[k].brightness);
+          sum += map(dist, 0, blobs[k].size, 255, 0);
         }
       }
 

@@ -38,8 +38,8 @@ void loop() {
   //FastLED.clear();
 
   // spiral();
-  twinkle();
-  // metaballs();
+  // twinkle();
+  lavalamp();
   // starfield();
 
   FastLED.setBrightness(MAX_BRIGHTNESS);
