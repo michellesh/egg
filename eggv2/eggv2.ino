@@ -31,8 +31,12 @@ Palette palette;
 #include "SubPattern.h"
 #include "SpiralSubPattern.h"
 
-SpiralSubPattern continuousSpiral(SpiralSubPattern::CONTINUOUS_SPIRAL);
+SpiralSubPattern rubberBandWorm(SpiralSubPattern::RUBBER_BAND_WORM);
+SpiralSubPattern rubberBandNoAnchor(SpiralSubPattern::RUBBER_BAND_NO_ANCHOR);
 SpiralSubPattern rubberBandAnchored(SpiralSubPattern::RUBBER_BAND_ANCHORED);
+SpiralSubPattern growingSpirals(SpiralSubPattern::GROWING_SPIRALS);
+SpiralSubPattern basicSpiralRotation(SpiralSubPattern::BASIC_SPIRAL_ROTATION);
+SpiralSubPattern continuousSpiral(SpiralSubPattern::CONTINUOUS_SPIRAL);
 
 void setup() {
   setupLEDs();
@@ -53,8 +57,12 @@ void loop() {
   FastLED.clear();
   palette.cycle();
 
+  //rubberBandWorm.show();
+  //rubberBandNoAnchor.show();
+  //rubberBandAnchored.show();
+  growingSpirals.show();
+  //basicSpiralRotation.show();
   //continuousSpiral.show();
-  rubberBandAnchored.show();
 
   // spiral(sinRingOffset);
   // twinkle();

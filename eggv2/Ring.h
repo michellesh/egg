@@ -5,6 +5,8 @@ int ringNumLEDs[] = {15, 19, 23, 25, 25, 25, 25, 23, 21, 19, 15, 11, 7};
 float ringHeight[] = {0,     11.8,  26.1,  42.1,  58.7,  75.7, 92.7,
                       109.3, 125.3, 140.6, 154.8, 167.3, 176.8};
 float MAX_RING_HEIGHT = 176.8;
+float PERCENT_HEIGHT_RING[] = {100.0, 92.31, 84.62, 76.92, 69.23, 61.54, 53.85,
+                               46.15, 38.46, 30.77, 23.08, 15.38, 7.69};
 
 // how many LEDs off is the beginning of the ring from where the LED strip
 // starts on that ring
@@ -21,6 +23,6 @@ struct Ring {
   float height;
   float diameter;
 
-  CRGB *leds; // array of LEDs in this ring
+  CRGB *leds;   // array of LEDs in this ring
   float *angle; // degree position of each LED in this ring
 };

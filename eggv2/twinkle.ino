@@ -41,12 +41,3 @@ void twinkle() {
     }
   }
 }
-
-uint8_t attackDecayWave8(uint8_t i) {
-  if (i < 86) {
-    return i * 3;
-  } else {
-    i -= 86;
-    return 255 - (i + (i / 2));
-  }
-}

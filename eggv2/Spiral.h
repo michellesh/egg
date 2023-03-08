@@ -1,3 +1,5 @@
+#define MAX_SPIRALS 3
+
 class Spiral : public Pattern {
  private:
   uint8_t _id = 0;
@@ -5,6 +7,8 @@ class Spiral : public Pattern {
   int16_t _width = WIDTH.DFLT;
   int16_t _speed = SPEED.DFLT;
   int16_t _ringOffset[NUM_RINGS] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  uint8_t _heightBrightness[NUM_RINGS] = {255, 255, 255, 255, 255,
+                                          255, 255, 255, 255, 255, 255, 255, 255};
 
   // Gets the brightness of the LED if the LED's angle is close to the current
   // angle
@@ -29,10 +33,10 @@ class Spiral : public Pattern {
                        ? targetAngle + 360 - pixelAngle
                        : 0;
 
-    //uint8_t brightness = addFadeShape(map(dist, 0, _width, 0, 255));
-    //return min(brightness, _heightBrightness[i]);
-    int b = map(dist, 0, _width, 0, 255);
-    return b < 127 ? b * 2 : 255 - (2 * (b - 128));
+    uint8_t brightness = addFadeShape(map(dist, 0, _width, 0, 255));
+    return min(brightness, _heightBrightness[i]);
+    //int b = map(dist, 0, _width, 0, 255);
+    //return b < 127 ? b * 2 : 255 - (2 * (b - 128));
   };
 
  public:
@@ -57,6 +61,25 @@ class Spiral : public Pattern {
 
   void reverse() { _speed = _speed * -1; }
 
+  void setHeightRangePercent(uint8_t min, uint8_t max) {
+    uint8_t fade = 50;  // how much percent of full height to add fade
+    for (uint8_t i = 0; i < NUM_RINGS; i++) {
+      if (min == 0 && max == 100) {
+        _heightBrightness[i] = 255;
+      }
+
+      float height = PERCENT_HEIGHT_RING[i];
+      _heightBrightness[i] =
+          isBetweenI(height, min, min + fade)
+              ? map(height, min, min + fade, 0, 255)
+          : isBetweenI(height, max - fade, max)
+              ? map(height, max - fade, max, 255, 0)
+          : min < max ? (isBetweenI(height, min + fade, max - fade) ? 255 : 0)
+                      : (isBetweenI(height, max, min) ? 0 : 255);
+    }
+  }
+
+
   void show() {
     for (uint8_t i = 0; i < NUM_RINGS; i++) {
       for (uint8_t j = 0; j < rings[i].numLEDs; j++) {
@@ -64,7 +87,7 @@ class Spiral : public Pattern {
         if (brightness > 0) {
           //CRGB color = palette.getColor(_id * 2).nscale8(
           //    brightness * getPercentBrightness() / 100);
-          CRGB color = palette.mapToColor(_id, 0, 1);
+          CRGB color = palette.mapToColor(_id, 0, MAX_SPIRALS);
           rings[i].leds[j] = color.nscale8(brightness);
           //color = brightness > 0 ? spiralColor : color;
           //rings[i].setBlend(j, color, brightness);
