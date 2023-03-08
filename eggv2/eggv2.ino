@@ -35,16 +35,17 @@ void setup() {
   setupRings();
   setupBlobs();
   setupStarfield();
+  setupSpirals();
 }
 
 void loop() {
-  fadeToBlackBy(leds, NUM_LEDS, 1);
-  //FastLED.clear();
+  //fadeToBlackBy(leds, NUM_LEDS, 1);
+  FastLED.clear();
   palette.cycle();
 
-  // spiral();
+  spiral();
   // twinkle();
-  lavalamp();
+  // lavalamp();
   // starfield();
 
   FastLED.setBrightness(MAX_BRIGHTNESS);
