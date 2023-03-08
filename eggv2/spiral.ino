@@ -1,6 +1,6 @@
 #define NUM_SPIRALS 1
 
-struct Spiral {
+struct TestSpiral {
   int spiralSpeed;
   int width;
   int ringOffset;
@@ -34,7 +34,7 @@ struct Spiral {
   }
 };
 
-Spiral spirals[NUM_SPIRALS];
+TestSpiral spirals[NUM_SPIRALS];
 
 void setupSpirals() {
   for (int i = 0; i < NUM_SPIRALS; i++) {

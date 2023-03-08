@@ -24,6 +24,15 @@ CRGB leds[NUM_LEDS];
 #include "Palette.h"
 Palette palette;
 
+#include "Range.h"
+#include "Pattern.h"
+#include "Spiral.h"
+
+#include "SubPattern.h"
+#include "SpiralSubPattern.h"
+
+SpiralSubPattern continuousSpiral(SpiralSubPattern::CONTINUOUS_SPIRAL);
+
 void setup() {
   setupLEDs();
 
@@ -45,10 +54,12 @@ void loop() {
   FastLED.clear();
   palette.cycle();
 
-  sinRingOffset = sawtooth(0, 360, 800);
+  sinRingOffset = sawtooth(0, 360, 1000);
   Serial.println(sinRingOffset);
 
-  spiral(sinRingOffset);
+  continuousSpiral.show();
+
+  // spiral(sinRingOffset);
   // twinkle();
   // lavalamp();
   // starfield();
