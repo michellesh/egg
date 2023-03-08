@@ -1,7 +1,12 @@
 #include <FastLED.h>
 
+// Incremented once per iteration of the loop
+unsigned long ticks = 0;
+
+// clang-format off
 #include "Ring.h"
 #include "utils.h"
+// clang-format on
 
 #define LED_PIN_1 13
 #define LED_PIN_2 14
@@ -11,12 +16,9 @@
 
 #define NUM_RINGS 13
 #define MAX_BRIGHTNESS 50 // 255 uses too much power for all LEDs
-#define CURSOR_SIZE 10
 
-CRGB leds[NUM_LEDS];
 Ring rings[NUM_RINGS];
-
-int angle = 0;
+CRGB leds[NUM_LEDS];
 
 void setup() {
   setupLEDs();
@@ -25,16 +27,19 @@ void setup() {
   delay(500);
 
   setupRings();
+  randomSeed(analogRead(0));
 }
 
 void loop() {
   FastLED.clear();
 
-  spiral();
+  // spiral();
   // twinkle();
+  metaballs();
 
   FastLED.setBrightness(MAX_BRIGHTNESS);
   FastLED.show();
+  ticks++;
 }
 
 void testAllLEDsOn() {

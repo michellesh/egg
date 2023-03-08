@@ -4,7 +4,7 @@ int ringNumLEDs[] = {15, 19, 23, 25, 25, 25, 25, 23, 21, 19, 15, 11, 7};
 // height (z index) of each ring
 float ringHeight[] = {0,     11.8,  26.1,  42.1,  58.7,  75.7, 92.7,
                       109.3, 125.3, 140.6, 154.8, 167.3, 176.8};
-float maxRingHeight = 75.7; // TODO will be 176.8
+float MAX_RING_HEIGHT = 176.8;
 
 // how many LEDs off is the beginning of the ring from where the LED strip
 // starts on that ring
@@ -22,6 +22,5 @@ struct Ring {
   float diameter;
 
   CRGB *leds; // array of LEDs in this ring
-  CHSV *canvas; // array of LEDs in this ring
   float *angle; // degree position of each LED in this ring
 };

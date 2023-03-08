@@ -2,7 +2,7 @@ int _spiralSpeed = 1;
 int _width = 120;
 int _ringOffset = 10;
 
-int _getSpiralBrightness(int r, int i) {
+int _getSpiralBrightness(int r, int i, int angle) {
   int ringOffset = _ringOffset * r;
   int targetAngle = (angle + ringOffset + 360) % 360;
   int pixelAngle = rings[r].angle[i];
@@ -25,9 +25,11 @@ int _getSpiralBrightness(int r, int i) {
 }
 
 void spiral() {
+  static int angle = 0;
+
   for (int r = 0; r < NUM_RINGS; r++) {
     for (int i = 0; i < rings[r].numLEDs; i++) {
-      int brightness = _getSpiralBrightness(r, i);
+      int brightness = _getSpiralBrightness(r, i, angle);
       rings[r].leds[i] = CHSV(HUE_BLUE, 100, brightness);
     }
   }
