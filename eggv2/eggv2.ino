@@ -38,12 +38,17 @@ void setup() {
   setupSpirals();
 }
 
+int sinRingOffset;
+
 void loop() {
   //fadeToBlackBy(leds, NUM_LEDS, 1);
   FastLED.clear();
   palette.cycle();
 
-  spiral();
+  sinRingOffset = sawtooth(0, 360, 800);
+  Serial.println(sinRingOffset);
+
+  spiral(sinRingOffset);
   // twinkle();
   // lavalamp();
   // starfield();

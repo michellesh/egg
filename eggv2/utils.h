@@ -11,3 +11,15 @@ bool isBetween(int16_t value, int16_t min, int16_t max,
                bool inclusive = false) {
   return inclusive ? value >= min && value <= max : value > min && value < max;
 }
+
+float sinwave(float minValue, float maxValue, unsigned long waveLength = 50,
+              unsigned long waveLengthOffset = 0) {
+  return mapf(sin((float)(ticks + waveLengthOffset) * PI / waveLength), -1, 1,
+              minValue, maxValue);
+}
+
+float sawtooth(float minValue, float maxValue, unsigned long waveLength = 50,
+               unsigned long waveLengthOffset = 0) {
+  float t = (float)(ticks + waveLengthOffset) / waveLength;
+  return mapf(t - floor(t), 0, 1, minValue, maxValue);
+}

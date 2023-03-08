@@ -1,4 +1,4 @@
-DEFINE_GRADIENT_PALETTE(_firePalette){0,   0,   0,   0,  // black
+DEFINE_GRADIENT_PALETTE(_firePalette){0,   139, 0,   0,  // CRGB::DarkRed
                                       85,  255, 0,   0,  // red
                                       170, 255, 140, 0,  // CRGB::Orange
                                       255, 255, 215, 0}; // CRGB::Gold

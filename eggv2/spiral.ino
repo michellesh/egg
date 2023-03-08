@@ -1,4 +1,4 @@
-#define NUM_SPIRALS 3
+#define NUM_SPIRALS 1
 
 struct Spiral {
   int spiralSpeed;
@@ -37,17 +37,19 @@ struct Spiral {
 Spiral spirals[NUM_SPIRALS];
 
 void setupSpirals() {
-  spirals[0] = {1, 120, 40, 0};
-  spirals[1] = {1, 120, 40, 120};
-  spirals[2] = {1, 120, 40, 240};
+  for (int i = 0; i < NUM_SPIRALS; i++) {
+    spirals[i] = {1, 120, 40, 360 / NUM_SPIRALS * i};
+  }
 }
 
-void spiral() {
+void spiral(int sinRingOffset) {
+
   for (int i = 0; i < NUM_RINGS; i++) {
     for (int j = 0; j < rings[i].numLEDs; j++) {
       int sum = 0;
       CRGB color;
       for (int k = 0; k < NUM_SPIRALS; k++) {
+        spirals[k].ringOffset = sinRingOffset;
         int brightness = spirals[k].getBrightness(i, j);
         sum += brightness;
         CRGB spiralColor = palette.mapToColor(k, 0, NUM_SPIRALS);
