@@ -26,12 +26,15 @@ void setup() {
   Serial.begin(115200);
   delay(500);
 
-  setupRings();
   randomSeed(analogRead(0));
+
+  setupRings();
+  setupBlobs();
 }
 
 void loop() {
-  FastLED.clear();
+  fadeToBlackBy(leds, NUM_LEDS, 20);
+  //FastLED.clear();
 
   // spiral();
   // twinkle();
