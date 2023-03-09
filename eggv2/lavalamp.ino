@@ -1,4 +1,4 @@
-#define NUM_BLOBS 20
+#define NUM_BLOBS 15
 
 struct Blob {
   float size;
@@ -13,11 +13,7 @@ struct Blob {
     height = speed > 0 ? -size : MAX_RING_HEIGHT + size;
   }
 
-  float _getRandomSpeed() {
-    bool reverse = random(0, 2);
-    float _speed = float(random(5, 10)) / 10;
-    return reverse ? _speed * -1 : _speed;
-  }
+  float _getRandomSpeed() { return float(random(5, 10)) / 10; }
 
   void update() {
     height += speed;
@@ -33,6 +29,7 @@ void setupBlobs() {
   for (int k = 0; k < NUM_BLOBS; k++) {
     Blob b;
     b.reset();
+    b.height = random(0, MAX_RING_HEIGHT);
     blobs[k] = b;
   }
 }
@@ -52,7 +49,7 @@ void lavalamp() {
       }
 
       sum = constrain(sum, 0, 255);
-      CRGB color = palette.getColor(r, i);
+      CRGB color = palette.mapToColor(1, 0, 1);
       rings[r].leds[i] = color.nscale8(sum);
     }
   }

@@ -78,12 +78,12 @@ void loop() {
   FastLED.clear();
   palette.cycle();
 
-  // lavalamp();
+  lavalamp();
   // starfield();
 
   static uint8_t activePatternIndex = 0;
 
-  activePatterns[activePatternIndex]->show();
+  //activePatterns[activePatternIndex]->show();
 
   if (brightness > 0 && playPattern.complete()) {
     // Fade out

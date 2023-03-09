@@ -65,7 +65,7 @@ private:
   }
 
   void _showContinuousSpiral() {
-    unsigned long w = 1000; // waveLength
+    unsigned long w = 800; // waveLength
     // unsigned long wo = w * 3 / 4;  // waveLengthOffset
     int offset = sawtooth(0, 360, w);
     // int16_t width = sinwave(30, 180, w / 2, wo);
