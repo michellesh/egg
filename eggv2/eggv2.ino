@@ -49,7 +49,6 @@ void setup() {
   setupRings();
   setupBlobs();
   setupStarfield();
-  setupSpirals();
 }
 
 void loop() {
@@ -64,7 +63,6 @@ void loop() {
   //basicSpiralRotation.show();
   //continuousSpiral.show();
 
-  // spiral(sinRingOffset);
   // twinkle();
   // lavalamp();
   // starfield();
