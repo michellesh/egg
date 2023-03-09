@@ -27,10 +27,14 @@ Palette palette;
 #include "Pattern.h"
 #include "Range.h"
 #include "Spiral.h"
+#include "Twinkle.h"
 
 #include "SubPattern.h"
 #include "SpiralSubPattern.h"
+#include "TwinkleSubPattern.h"
 // clang-format on
+
+TwinkleSubPattern twinkle;
 
 SpiralSubPattern rubberBandWorm(SpiralSubPattern::RUBBER_BAND_WORM);
 SpiralSubPattern rubberBandNoAnchor(SpiralSubPattern::RUBBER_BAND_NO_ANCHOR);
@@ -41,6 +45,7 @@ SpiralSubPattern continuousSpiral(SpiralSubPattern::CONTINUOUS_SPIRAL);
 
 // clang-format off
 SubPattern *activePatterns[] = {
+  &twinkle,
   &rubberBandWorm,
   &rubberBandNoAnchor,
   &rubberBandAnchored,
@@ -71,17 +76,8 @@ void setup() {
 void loop() {
   // fadeToBlackBy(leds, NUM_LEDS, 1);
   FastLED.clear();
-  // clearLEDs();
   palette.cycle();
 
-  // rubberBandWorm.show();
-  // rubberBandNoAnchor.show();
-  // rubberBandAnchored.show();
-  // growingSpirals.show();
-  // basicSpiralRotation.show();
-  // continuousSpiral.show();
-
-  // twinkle();
   // lavalamp();
   // starfield();
 
