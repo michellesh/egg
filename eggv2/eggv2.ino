@@ -5,9 +5,9 @@ unsigned long ticks = 0;
 
 // clang-format off
 #include "Ring.h"
+#include "Timer.h"
 #include "utils.h"
 #include "colors.h"
-// clang-format on
 
 #define LED_PIN_1 13
 #define LED_PIN_2 14
@@ -16,7 +16,7 @@ unsigned long ticks = 0;
 #define NUM_LEDS 252
 
 #define NUM_RINGS 13
-#define MAX_BRIGHTNESS 50 // 255 uses too much power for all LEDs
+#define MAX_BRIGHTNESS 100 // 255 uses too much power for all LEDs
 
 Ring rings[NUM_RINGS];
 CRGB leds[NUM_LEDS];
@@ -24,12 +24,13 @@ CRGB leds[NUM_LEDS];
 #include "Palette.h"
 Palette palette;
 
-#include "Range.h"
 #include "Pattern.h"
+#include "Range.h"
 #include "Spiral.h"
 
 #include "SubPattern.h"
 #include "SpiralSubPattern.h"
+// clang-format on
 
 SpiralSubPattern rubberBandWorm(SpiralSubPattern::RUBBER_BAND_WORM);
 SpiralSubPattern rubberBandNoAnchor(SpiralSubPattern::RUBBER_BAND_NO_ANCHOR);
@@ -37,6 +38,22 @@ SpiralSubPattern rubberBandAnchored(SpiralSubPattern::RUBBER_BAND_ANCHORED);
 SpiralSubPattern growingSpirals(SpiralSubPattern::GROWING_SPIRALS);
 SpiralSubPattern basicSpiralRotation(SpiralSubPattern::BASIC_SPIRAL_ROTATION);
 SpiralSubPattern continuousSpiral(SpiralSubPattern::CONTINUOUS_SPIRAL);
+
+// clang-format off
+SubPattern *activePatterns[] = {
+  &rubberBandWorm,
+  &rubberBandNoAnchor,
+  &rubberBandAnchored,
+  &growingSpirals,
+  &basicSpiralRotation,
+  &continuousSpiral
+};
+// clang-format on
+
+Timer playPattern = {10000}; // 10 seconds
+float brightness = MAX_BRIGHTNESS;
+float fadeIncrement = 0.2;
+uint8_t numPatterns = sizeof(activePatterns) / sizeof(activePatterns[0]);
 
 void setup() {
   setupLEDs();
@@ -52,22 +69,41 @@ void setup() {
 }
 
 void loop() {
-  //fadeToBlackBy(leds, NUM_LEDS, 1);
+  // fadeToBlackBy(leds, NUM_LEDS, 1);
   FastLED.clear();
+  // clearLEDs();
   palette.cycle();
 
-  //rubberBandWorm.show();
-  //rubberBandNoAnchor.show();
-  //rubberBandAnchored.show();
-  growingSpirals.show();
-  //basicSpiralRotation.show();
-  //continuousSpiral.show();
+  // rubberBandWorm.show();
+  // rubberBandNoAnchor.show();
+  // rubberBandAnchored.show();
+  // growingSpirals.show();
+  // basicSpiralRotation.show();
+  // continuousSpiral.show();
 
   // twinkle();
   // lavalamp();
   // starfield();
 
-  FastLED.setBrightness(MAX_BRIGHTNESS);
+  static uint8_t activePatternIndex = 0;
+
+  activePatterns[activePatternIndex]->show();
+
+  if (brightness > 0 && playPattern.complete()) {
+    // Fade out
+    brightness -= fadeIncrement;
+  } else if (brightness <= 0) {
+    // Increment active pattern
+    activePatternIndex = (activePatternIndex + 1) % numPatterns;
+    playPattern.reset();
+    brightness = 1;
+  } else if (brightness < MAX_BRIGHTNESS) {
+    // Fade in
+    brightness += fadeIncrement;
+  }
+
+
+  FastLED.setBrightness(brightness);
   FastLED.show();
   ticks++;
 }
