@@ -4,14 +4,33 @@ struct TransitionValue {
   float min;
   float max;
   float increment;
+  Timer timer = {10000};
+
+  void init(float _current, float _target, float _min, float _max,
+            float _increment) {
+    current = _current;
+    target = _target;
+    min = _min;
+    max = _max;
+    increment = _increment;
+  }
   void update() {
-    if (current == target) {
+    if (roundPrecision(current, 2) == roundPrecision(target, 2)) {
       reset();
     } else if (current < target) {
       current += increment;
     } else {
       current -= increment;
-      ;
+    }
+  }
+  void timedUpdate() {
+    if (timer.complete()) {
+      reset();
+      timer.reset();
+    } else if (current < target) {
+      current += increment;
+    } else if (current > target) {
+      current -= increment;
     }
   }
   void reset() { target = float(random(min, max)); }
@@ -22,21 +41,27 @@ private:
   Spiral _spirals[MAX_SPIRALS];
   uint8_t _numSpirals = MAX_SPIRALS;
   uint8_t _activeSubPattern = 0;
-  TransitionValue _width = {120, 120, 30, 180, 0.5};
-  TransitionValue _offset = {10, 10, 5, 30, 0.5};
-  TransitionValue _waveLength = {500, 500, 500, 800, 1};
+  TransitionValue _width;
+  TransitionValue _widthOffset;
+  TransitionValue _heightOffsetIncrement;
+  float _heightOffset = 0;
 
   void _showSeaweed() {
     EVERY_N_MILLISECONDS(50) {
       _width.update();
-      _offset.update();
-      _waveLength.update();
+      _widthOffset.update();
+      _heightOffsetIncrement.timedUpdate();
+      _heightOffset -= (_heightOffsetIncrement.current / 10);
+      if (_heightOffset < 0) {
+        _heightOffset = NUM_RINGS - 0.5;
+      }
+      Serial.println(_heightOffset);
     }
-    float offset = sawtooth(NUM_RINGS - 0.5, 0, _waveLength.current);
     for (uint8_t i = 0; i < _numSpirals; i++) {
       for (uint8_t j = 0; j < NUM_RINGS; j++) {
-        _spirals[i].setRingOffset(
-            j, mapf(sin(j + offset), -1, 1, -_offset.current, _offset.current));
+        _spirals[i].setRingOffset(j, mapf(sin(j + _heightOffset), -1, 1,
+                                          -_widthOffset.current,
+                                          _widthOffset.current));
       }
       _spirals[i].setWidth(_width.current);
       _spirals[i].show();
@@ -187,7 +212,7 @@ public:
     case RANDOM_ORGANIC:
       _numSpirals = 1;
       _spirals[0] = Spiral();
-      _width = {120, 120, 30, 180, 0.5};
+      _width.init(120, 120, 30, 180, 0.5);
       break;
     case SEAWEED:
       _numSpirals = 3;
@@ -197,9 +222,10 @@ public:
         _spirals[i].setWidth(30);
         _spirals[i].setSpeed(0);
       }
-      _width = {45, 45, 30, 120, 0.5};
-      _offset = {10, 10, 5, 30, 0.5};
-      _waveLength = {500, 500, 300, 1000, 1};
+      _width.init(45, 45, 30, 120, 0.5);
+      _widthOffset.init(10, 10, 5, 30, 0.5);
+      _heightOffsetIncrement.init(1, 1, 1, 5, 0.1);
+      _heightOffset = 0;
       break;
     default:
       break;

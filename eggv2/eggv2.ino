@@ -49,14 +49,8 @@ SpiralSubPattern seaweed(SpiralSubPattern::SEAWEED);
 
 // clang-format off
 SubPattern *activePatterns[] = {
-  &twinkle,
-  //&rubberBandWorm,
-  //&rubberBandNoAnchor,
-  //&rubberBandAnchored,
-  //&growingSpirals,
-  //&basicSpiralRotation,
-  //&continuousSpiral,
-  &randomOrganic,
+  //&twinkle,
+  //&randomOrganic,
   &seaweed,
 };
 // clang-format on
