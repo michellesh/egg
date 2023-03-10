@@ -17,6 +17,8 @@ unsigned long ticks = 0;
 
 #define NUM_RINGS 13
 #define MAX_BRIGHTNESS 100 // 255 uses too much power for all LEDs
+#define SECONDS_PER_PATTERN 60
+#define SECONDS_PER_PALETTE 30
 
 Ring rings[NUM_RINGS];
 CRGB leds[NUM_LEDS];
@@ -47,18 +49,19 @@ SpiralSubPattern seaweed(SpiralSubPattern::SEAWEED);
 
 // clang-format off
 SubPattern *activePatterns[] = {
-  //&twinkle,
+  &twinkle,
   //&rubberBandWorm,
   //&rubberBandNoAnchor,
   //&rubberBandAnchored,
   //&growingSpirals,
   //&basicSpiralRotation,
-  &continuousSpiral,
-  //&randomOrganic
+  //&continuousSpiral,
+  &randomOrganic,
+  &seaweed,
 };
 // clang-format on
 
-Timer playPattern = {10000}; // 10 seconds
+Timer playPattern = {SECONDS_PER_PATTERN * 1000};
 float brightness = MAX_BRIGHTNESS;
 float fadeIncrement = 0.2;
 uint8_t numPatterns = sizeof(activePatterns) / sizeof(activePatterns[0]);
@@ -90,25 +93,24 @@ void loop() {
 
   static uint8_t activePatternIndex = 0;
 
-  //activePatterns[activePatternIndex]->show();
+  activePatterns[activePatternIndex]->show();
   //continuousSpiral.show();
   //randomOrganic.show();
-  seaweed.show();
+  //seaweed.show();
 
   // Pattern transition
-  //if (brightness > 0 && playPattern.complete()) {
-  //  // Fade out
-  //  brightness -= fadeIncrement;
-  //} else if (brightness <= 0) {
-  //  // Increment active pattern
-  //  activePatternIndex = (activePatternIndex + 1) % numPatterns;
-  //  playPattern.reset();
-  //  brightness = 1;
-  //} else if (brightness < MAX_BRIGHTNESS) {
-  //  // Fade in
-  //  brightness += fadeIncrement;
-  //}
-
+  if (brightness > 0 && playPattern.complete()) {
+    // Fade out
+    brightness -= fadeIncrement;
+  } else if (brightness <= 0) {
+    // Increment active pattern
+    activePatternIndex = (activePatternIndex + 1) % numPatterns;
+    playPattern.reset();
+    brightness = 1;
+  } else if (brightness < MAX_BRIGHTNESS) {
+    // Fade in
+    brightness += fadeIncrement;
+  }
 
   FastLED.setBrightness(brightness);
   FastLED.show();

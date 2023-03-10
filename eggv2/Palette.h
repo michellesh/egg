@@ -5,7 +5,6 @@ private:
   CRGBPalette16 _currentPalette = *(activePalettes[0]);
   CRGBPalette16 _targetPalette = *(activePalettes[0]);
   uint8_t _activeColorMode = VERTICAL_GRADIENT;
-  uint8_t _secondsPerPalette = 10;
 
   void _setNextColorPalette() {
     const uint8_t numberOfPalettes =
@@ -26,7 +25,7 @@ public:
   void setColorMode(uint8_t colorMode) { _activeColorMode = colorMode; }
 
   void cycle() {
-    EVERY_N_SECONDS(_secondsPerPalette) { _setNextColorPalette(); }
+    EVERY_N_SECONDS(SECONDS_PER_PALETTE) { _setNextColorPalette(); }
 
     EVERY_N_MILLISECONDS(10) {
       nblendPaletteTowardPalette(_currentPalette, _targetPalette, 12);
