@@ -87,42 +87,11 @@ void loop() {
   // lavalamp();
   // starfield();
 
-  if (setOffsetWaveLength.complete()) {
-    unsigned long waveLength = random(4000, 10000);
-    setOffsetWaveLength.totalCycleTime = waveLength * 6;
-    randomOrganic.setTargetOffsetWaveLength(waveLength);
-    randomOrganic.newOffsetRange();
-    setOffsetWaveLength.reset();
-    //Serial.print("new offset wavelength: ");
-    //Serial.println(setOffsetWaveLength.totalCycleTime);
-  }
-  if (setWidthWaveLength.complete()) {
-    unsigned long waveLength = random(4000, 10000);
-    setWidthWaveLength.totalCycleTime = waveLength * 6;
-    randomOrganic.setTargetWidthWaveLength(waveLength);
-    randomOrganic.newWidthRange();
-    setWidthWaveLength.reset();
-    //Serial.print("new width wavelength: ");
-    //Serial.println(setWidthWaveLength.totalCycleTime);
-  }
-  if (setSpeedWaveLength.complete()) {
-    unsigned long waveLength = random(4000, 10000);
-    setSpeedWaveLength.totalCycleTime = waveLength * 6;
-    randomOrganic.setTargetSpeedWaveLength(waveLength);
-    randomOrganic.newSpeedRange();
-    setSpeedWaveLength.reset();
-    //Serial.print("new speed wavelength: ");
-    //Serial.println(setSpeedWaveLength.totalCycleTime);
-  }
-
-  EVERY_N_MILLISECONDS(50) {
-    randomOrganic.transitionWaveLengths();
-  }
-
   static uint8_t activePatternIndex = 0;
 
   //activePatterns[activePatternIndex]->show();
-  continuousSpiral.show();
+  //continuousSpiral.show();
+  randomOrganic.show();
 
   // Pattern transition
   //if (brightness > 0 && playPattern.complete()) {

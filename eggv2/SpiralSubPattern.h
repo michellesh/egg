@@ -1,25 +1,20 @@
-struct TransitionRange {
-  int16_t currentMin;
-  int16_t targetMin;
-  int16_t currentMax;
-  int16_t targetMax;
-  void transition() {
-    // Min
-    if (currentMin == targetMin) {
-      return;
-    } else if (currentMin < targetMin) {
-      currentMin++;
-    } else if (currentMin > targetMin) {
-      currentMin--;
+struct TransitionValue {
+  int16_t current;
+  int16_t target;
+  int16_t min;
+  int16_t max;
+  void update() {
+    if (current == target) {
+      reset();
+    } else if (current < target) {
+      current++;
+    } else {
+      current--;
     }
-    // Max
-    if (currentMax == targetMax) {
-      return;
-    } else if (currentMax < targetMax) {
-      currentMax++;
-    } else if (currentMax > targetMax) {
-      currentMax--;
-    }
+  }
+  void reset() {
+    target = random(min, max);
+    Serial.println(target);
   }
 };
 
@@ -28,28 +23,18 @@ private:
   Spiral _spirals[MAX_SPIRALS];
   uint8_t _numSpirals = MAX_SPIRALS;
   uint8_t _activeSubPattern = 0;
-  unsigned long _offsetWaveLength = 5000;
-  unsigned long _speedWaveLength = 5000;
-  unsigned long _widthWaveLength = 5000;
-  unsigned long _targetOffsetWaveLength = 5000;
-  unsigned long _targetSpeedWaveLength = 5000;
-  unsigned long _targetWidthWaveLength = 5000;
-  TransitionRange _offset = {0, 0, 360, 360};
-  TransitionRange _width = {30, 30, 180, 180};
-  TransitionRange _speed = {0, 0, 5, 5};
+  TransitionValue _width = {120, 120, 30, 180};
 
   void _showRandomOrganic() {
-    //int16_t offset = sawtooth(0, 360, _offsetWaveLength);
-    //int16_t width = sinwave(30, 180, _widthWaveLength);
-    //int16_t speed = sinwave(0, 5, _speedWaveLength);
-    int16_t offset = sawtooth(_offset.currentMin, _offset.currentMax, _offsetWaveLength);
-    int16_t width = sinwave(_width.currentMin, _width.currentMax, _widthWaveLength);
-    int16_t speed = sinwave(_speed.currentMin, _speed.currentMax, _speedWaveLength);
-    Serial.println(offset);
-    _spirals[0].setWidth(width);
-    _spirals[0].setSpeed(speed);
+    unsigned long w = 10000; // waveLength
+    int offset = sawtooth(0, 360, w);
+    EVERY_N_MILLISECONDS(50) {
+      _width.update();
+    }
+    _spirals[0].setWidth(_width.current);
     for (uint8_t i = 0; i < NUM_RINGS; i++) {
       _spirals[0].setRingOffset(i, i * offset);
+      //_spirals[0].setSpeed(speed);
     }
     _spirals[0].show();
   }
@@ -190,63 +175,6 @@ public:
     default:
       break;
     }
-  }
-
-  void setTargetOffsetWaveLength(unsigned long waveLength) {
-    _targetOffsetWaveLength = waveLength;
-  }
-
-  void setTargetWidthWaveLength(unsigned long waveLength) {
-    _targetWidthWaveLength = waveLength;
-  }
-
-  void setTargetSpeedWaveLength(unsigned long waveLength) {
-    _targetSpeedWaveLength = waveLength;
-  }
-
-  void transitionWaveLengths() {
-    // offset
-    if (_offsetWaveLength < _targetOffsetWaveLength) {
-      _offsetWaveLength++;
-    }
-    if (_offsetWaveLength > _targetOffsetWaveLength) {
-      _offsetWaveLength--;
-    }
-
-    // width
-    if (_widthWaveLength < _targetWidthWaveLength) {
-      _widthWaveLength++;
-    }
-    if (_widthWaveLength > _targetWidthWaveLength) {
-      _widthWaveLength--;
-    }
-
-    // speed
-    if (_speedWaveLength < _targetSpeedWaveLength) {
-      _speedWaveLength++;
-    }
-    if (_speedWaveLength > _targetSpeedWaveLength) {
-      _speedWaveLength--;
-    }
-  }
-
-  void newOffsetRange() {
-    int16_t v1 = random(0, 360);
-    int16_t v2 = random(0, 360);
-    _offset.targetMin = min(v1, v2);
-    _offset.targetMax = max(v1, v2);
-  }
-  void newSpeedRange() {
-    int16_t v1 = random(-2, 2);
-    int16_t v2 = random(-2, 2);
-    _speed.targetMin = min(v1, v2);
-    _speed.targetMax = max(v1, v2);
-  }
-  void newWidthRange() {
-    int16_t v1 = random(30, 180);
-    int16_t v2 = random(30, 180);
-    _width.targetMin = min(v1, v2);
-    _width.targetMax = max(v1, v2);
   }
 
   virtual void show() {
