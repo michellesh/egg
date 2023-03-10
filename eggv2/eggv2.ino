@@ -43,6 +43,7 @@ SpiralSubPattern growingSpirals(SpiralSubPattern::GROWING_SPIRALS);
 SpiralSubPattern basicSpiralRotation(SpiralSubPattern::BASIC_SPIRAL_ROTATION);
 SpiralSubPattern continuousSpiral(SpiralSubPattern::CONTINUOUS_SPIRAL);
 SpiralSubPattern randomOrganic(SpiralSubPattern::RANDOM_ORGANIC);
+SpiralSubPattern seaweed(SpiralSubPattern::SEAWEED);
 
 // clang-format off
 SubPattern *activePatterns[] = {
@@ -91,7 +92,8 @@ void loop() {
 
   //activePatterns[activePatternIndex]->show();
   //continuousSpiral.show();
-  randomOrganic.show();
+  //randomOrganic.show();
+  seaweed.show();
 
   // Pattern transition
   //if (brightness > 0 && playPattern.complete()) {

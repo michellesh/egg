@@ -59,6 +59,8 @@ class Spiral : public Pattern {
 
   void setRingOffset(uint8_t i, int16_t angle) { _ringOffset[i] = angle; }
 
+  int16_t getRingOffset(uint8_t i) { return _ringOffset[i]; }
+
   void reverse() { _speed = _speed * -1; }
 
   void setHeightRangePercent(uint8_t min, uint8_t max) {

@@ -1,21 +1,20 @@
 struct TransitionValue {
-  int16_t current;
-  int16_t target;
-  int16_t min;
-  int16_t max;
+  float current;
+  float target;
+  float min;
+  float max;
+  float increment;
   void update() {
     if (current == target) {
       reset();
     } else if (current < target) {
-      current++;
+      current += increment;
     } else {
-      current--;
+      current -= increment;
+      ;
     }
   }
-  void reset() {
-    target = random(min, max);
-    Serial.println(target);
-  }
+  void reset() { target = float(random(min, max)); }
 };
 
 class SpiralSubPattern : public SubPattern {
@@ -23,18 +22,34 @@ private:
   Spiral _spirals[MAX_SPIRALS];
   uint8_t _numSpirals = MAX_SPIRALS;
   uint8_t _activeSubPattern = 0;
-  TransitionValue _width = {120, 120, 30, 180};
+  TransitionValue _width = {120, 120, 30, 180, 0.5};
+  TransitionValue _offset = {10, 10, 5, 30, 0.5};
+  TransitionValue _waveLength = {500, 500, 500, 800, 1};
+
+  void _showSeaweed() {
+    EVERY_N_MILLISECONDS(50) {
+      _width.update();
+      _offset.update();
+      _waveLength.update();
+    }
+    float offset = sawtooth(NUM_RINGS - 0.5, 0, _waveLength.current);
+    for (uint8_t i = 0; i < _numSpirals; i++) {
+      for (uint8_t j = 0; j < NUM_RINGS; j++) {
+        _spirals[i].setRingOffset(
+            j, mapf(sin(j + offset), -1, 1, -_offset.current, _offset.current));
+      }
+      _spirals[i].setWidth(_width.current);
+      _spirals[i].show();
+    }
+  }
 
   void _showRandomOrganic() {
     unsigned long w = 10000; // waveLength
     int offset = sawtooth(0, 360, w);
-    EVERY_N_MILLISECONDS(50) {
-      _width.update();
-    }
+    EVERY_N_MILLISECONDS(50) { _width.update(); }
     _spirals[0].setWidth(_width.current);
     for (uint8_t i = 0; i < NUM_RINGS; i++) {
       _spirals[0].setRingOffset(i, i * offset);
-      //_spirals[0].setSpeed(speed);
     }
     _spirals[0].show();
   }
@@ -103,7 +118,7 @@ private:
     unsigned long w = 10000; // waveLength
     // unsigned long wo = w * 3 / 4;  // waveLengthOffset
     int offset = sawtooth(0, 360, w);
-    int16_t width = sinwave(30, 180,5000);//, w / 2, wo);
+    int16_t width = sinwave(30, 180, 5000); //, w / 2, wo);
     // int16_t speed = sinwave(0, 5, w / 2, wo);
     _spirals[0].setWidth(width);
     for (uint8_t i = 0; i < NUM_RINGS; i++) {
@@ -121,6 +136,7 @@ public:
   static const uint8_t BASIC_SPIRAL_ROTATION = 4;
   static const uint8_t CONTINUOUS_SPIRAL = 5;
   static const uint8_t RANDOM_ORGANIC = 6;
+  static const uint8_t SEAWEED = 7;
 
   SpiralSubPattern(uint8_t activeSubPattern = 0) {
     _activeSubPattern = activeSubPattern;
@@ -171,6 +187,19 @@ public:
     case RANDOM_ORGANIC:
       _numSpirals = 1;
       _spirals[0] = Spiral();
+      _width = {120, 120, 30, 180, 0.5};
+      break;
+    case SEAWEED:
+      _numSpirals = 3;
+      for (uint8_t i = 0; i < _numSpirals; i++) {
+        _spirals[i] = Spiral();
+        _spirals[i].setAngle(i * 120);
+        _spirals[i].setWidth(30);
+        _spirals[i].setSpeed(0);
+      }
+      _width = {45, 45, 30, 120, 0.5};
+      _offset = {10, 10, 5, 30, 0.5};
+      _waveLength = {500, 500, 300, 1000, 1};
       break;
     default:
       break;
@@ -199,6 +228,9 @@ public:
       break;
     case RANDOM_ORGANIC:
       _showRandomOrganic();
+      break;
+    case SEAWEED:
+      _showSeaweed();
       break;
     default:
       break;
