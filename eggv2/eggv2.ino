@@ -42,16 +42,18 @@ SpiralSubPattern rubberBandAnchored(SpiralSubPattern::RUBBER_BAND_ANCHORED);
 SpiralSubPattern growingSpirals(SpiralSubPattern::GROWING_SPIRALS);
 SpiralSubPattern basicSpiralRotation(SpiralSubPattern::BASIC_SPIRAL_ROTATION);
 SpiralSubPattern continuousSpiral(SpiralSubPattern::CONTINUOUS_SPIRAL);
+SpiralSubPattern randomOrganic(SpiralSubPattern::RANDOM_ORGANIC);
 
 // clang-format off
 SubPattern *activePatterns[] = {
-  &twinkle,
-  &rubberBandWorm,
-  &rubberBandNoAnchor,
-  &rubberBandAnchored,
-  &growingSpirals,
-  &basicSpiralRotation,
-  &continuousSpiral
+  //&twinkle,
+  //&rubberBandWorm,
+  //&rubberBandNoAnchor,
+  //&rubberBandAnchored,
+  //&growingSpirals,
+  //&basicSpiralRotation,
+  &continuousSpiral,
+  //&randomOrganic
 };
 // clang-format on
 
@@ -59,6 +61,10 @@ Timer playPattern = {10000}; // 10 seconds
 float brightness = MAX_BRIGHTNESS;
 float fadeIncrement = 0.2;
 uint8_t numPatterns = sizeof(activePatterns) / sizeof(activePatterns[0]);
+
+Timer setOffsetWaveLength = {5000};
+Timer setWidthWaveLength = {5000};
+Timer setSpeedWaveLength = {5000};
 
 void setup() {
   setupLEDs();
@@ -78,25 +84,59 @@ void loop() {
   FastLED.clear();
   palette.cycle();
 
-  lavalamp();
+  // lavalamp();
   // starfield();
+
+  if (setOffsetWaveLength.complete()) {
+    unsigned long waveLength = random(4000, 10000);
+    setOffsetWaveLength.totalCycleTime = waveLength * 6;
+    randomOrganic.setTargetOffsetWaveLength(waveLength);
+    randomOrganic.newOffsetRange();
+    setOffsetWaveLength.reset();
+    //Serial.print("new offset wavelength: ");
+    //Serial.println(setOffsetWaveLength.totalCycleTime);
+  }
+  if (setWidthWaveLength.complete()) {
+    unsigned long waveLength = random(4000, 10000);
+    setWidthWaveLength.totalCycleTime = waveLength * 6;
+    randomOrganic.setTargetWidthWaveLength(waveLength);
+    randomOrganic.newWidthRange();
+    setWidthWaveLength.reset();
+    //Serial.print("new width wavelength: ");
+    //Serial.println(setWidthWaveLength.totalCycleTime);
+  }
+  if (setSpeedWaveLength.complete()) {
+    unsigned long waveLength = random(4000, 10000);
+    setSpeedWaveLength.totalCycleTime = waveLength * 6;
+    randomOrganic.setTargetSpeedWaveLength(waveLength);
+    randomOrganic.newSpeedRange();
+    setSpeedWaveLength.reset();
+    //Serial.print("new speed wavelength: ");
+    //Serial.println(setSpeedWaveLength.totalCycleTime);
+  }
+
+  EVERY_N_MILLISECONDS(50) {
+    randomOrganic.transitionWaveLengths();
+  }
 
   static uint8_t activePatternIndex = 0;
 
   //activePatterns[activePatternIndex]->show();
+  continuousSpiral.show();
 
-  if (brightness > 0 && playPattern.complete()) {
-    // Fade out
-    brightness -= fadeIncrement;
-  } else if (brightness <= 0) {
-    // Increment active pattern
-    activePatternIndex = (activePatternIndex + 1) % numPatterns;
-    playPattern.reset();
-    brightness = 1;
-  } else if (brightness < MAX_BRIGHTNESS) {
-    // Fade in
-    brightness += fadeIncrement;
-  }
+  // Pattern transition
+  //if (brightness > 0 && playPattern.complete()) {
+  //  // Fade out
+  //  brightness -= fadeIncrement;
+  //} else if (brightness <= 0) {
+  //  // Increment active pattern
+  //  activePatternIndex = (activePatternIndex + 1) % numPatterns;
+  //  playPattern.reset();
+  //  brightness = 1;
+  //} else if (brightness < MAX_BRIGHTNESS) {
+  //  // Fade in
+  //  brightness += fadeIncrement;
+  //}
 
 
   FastLED.setBrightness(brightness);
