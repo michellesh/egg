@@ -192,7 +192,7 @@ public:
     case SEAWEED:
       _numSpirals = 3;
       for (uint8_t i = 0; i < _numSpirals; i++) {
-        _spirals[i] = Spiral();
+        _spirals[i] = Spiral(i);
         _spirals[i].setAngle(i * 120);
         _spirals[i].setWidth(30);
         _spirals[i].setSpeed(0);
