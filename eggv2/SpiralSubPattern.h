@@ -55,7 +55,7 @@ private:
       if (_heightOffset < 0) {
         _heightOffset = NUM_RINGS - 0.5;
       }
-      Serial.println(_heightOffset);
+      //Serial.println(_heightOffset);
     }
     for (uint8_t i = 0; i < _numSpirals; i++) {
       for (uint8_t j = 0; j < NUM_RINGS; j++) {
@@ -224,7 +224,7 @@ public:
       }
       _width.init(45, 45, 30, 120, 0.5);
       _widthOffset.init(10, 10, 5, 30, 0.5);
-      _heightOffsetIncrement.init(1, 1, 1, 5, 0.1);
+      _heightOffsetIncrement.init(1, 1, 1, 5, 0.01);
       _heightOffset = 0;
       break;
     default:
