@@ -36,9 +36,11 @@ Palette palette;
 #include "SubPattern.h"
 #include "SpiralSubPattern.h"
 #include "TwinkleSubPattern.h"
+#include "SolidSubPattern.h"
 // clang-format on
 
 TwinkleSubPattern twinkle;
+SolidSubPattern solid;
 
 SpiralSubPattern rubberBandWorm(SpiralSubPattern::RUBBER_BAND_WORM);
 SpiralSubPattern rubberBandNoAnchor(SpiralSubPattern::RUBBER_BAND_NO_ANCHOR);
@@ -51,9 +53,10 @@ SpiralSubPattern seaweed(SpiralSubPattern::SEAWEED);
 
 // clang-format off
 SubPattern *activePatterns[] = {
-  &twinkle,
-  &randomOrganic,
-  &seaweed,
+  &solid,
+  //&twinkle,
+  //&randomOrganic,
+  //&seaweed,
 };
 // clang-format on
 

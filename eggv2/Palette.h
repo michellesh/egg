@@ -32,6 +32,10 @@ public:
     }
   }
 
+  CRGB getColorAtPaletteIndex(uint8_t paletteIndex) {
+    return ColorFromPalette(_currentPalette, paletteIndex);
+  }
+
   CRGB mapToColor(int value, int fromLow, int fromHigh) {
     uint8_t paletteIndex = map(value, fromLow, fromHigh, 0, MAX_PALETTE_INDEX);
     return ColorFromPalette(_currentPalette, paletteIndex);
