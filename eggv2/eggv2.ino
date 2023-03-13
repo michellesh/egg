@@ -14,6 +14,8 @@ unsigned long ticks = 0;
 #define NUM_LEDS_PIN_1 124
 #define NUM_LEDS_PIN_2 128
 #define NUM_LEDS 252
+#define BUTTON_PIN_POWER 25
+#define BUTTON_PIN_DATA 27
 
 #define NUM_RINGS 13
 #define MAX_BRIGHTNESS 100 // 255 uses too much power for all LEDs
@@ -49,8 +51,8 @@ SpiralSubPattern seaweed(SpiralSubPattern::SEAWEED);
 
 // clang-format off
 SubPattern *activePatterns[] = {
-  //&twinkle,
-  //&randomOrganic,
+  &twinkle,
+  &randomOrganic,
   &seaweed,
 };
 // clang-format on
@@ -75,22 +77,31 @@ void setup() {
   setupRings();
   setupBlobs();
   setupStarfield();
+
+  pinMode(BUTTON_PIN_POWER, OUTPUT);
+  pinMode(BUTTON_PIN_DATA, INPUT);
 }
 
 void loop() {
-  // fadeToBlackBy(leds, NUM_LEDS, 1);
+  // Send power to button
+  digitalWrite(BUTTON_PIN_POWER, HIGH);
+
+  // Handle button state
+  static int activePatternIndex = 0;
+  static int prevButtonRead = LOW;
+  int buttonRead = digitalRead(BUTTON_PIN_DATA); // HIGH when button is held
+  if (prevButtonRead == HIGH && buttonRead == LOW) {
+    activePatternIndex = (activePatternIndex + 1) % numPatterns;
+  }
+  prevButtonRead = buttonRead;
+
   FastLED.clear();
   palette.cycle();
 
   // lavalamp();
   // starfield();
 
-  static uint8_t activePatternIndex = 0;
-
   activePatterns[activePatternIndex]->show();
-  //continuousSpiral.show();
-  //randomOrganic.show();
-  //seaweed.show();
 
   // Pattern transition
   if (brightness > 0 && playPattern.complete()) {
