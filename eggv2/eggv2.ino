@@ -54,16 +54,17 @@ SpiralSubPattern seaweed(SpiralSubPattern::SEAWEED);
 // clang-format off
 SubPattern *activePatterns[] = {
   &solid,
-  //&twinkle,
-  //&randomOrganic,
-  //&seaweed,
+  &twinkle,
+  &randomOrganic,
+  &seaweed,
 };
 // clang-format on
 
-Timer playPattern = {SECONDS_PER_PATTERN * 1000};
+Timer cyclePatternTimer = {SECONDS_PER_PATTERN * 1000};
 float brightness = MAX_BRIGHTNESS;
 float fadeIncrement = 0.2;
 uint8_t numPatterns = sizeof(activePatterns) / sizeof(activePatterns[0]);
+bool autoCyclePatterns = true;
 
 Timer setOffsetWaveLength = {5000};
 Timer setWidthWaveLength = {5000};
@@ -94,7 +95,22 @@ void loop() {
   static int prevButtonRead = LOW;
   int buttonRead = digitalRead(BUTTON_PIN_DATA); // HIGH when button is held
   if (prevButtonRead == HIGH && buttonRead == LOW) {
-    activePatternIndex = (activePatternIndex + 1) % numPatterns;
+    // Clear LEDs to show user button was clicked
+    FastLED.clear();
+    FastLED.show();
+    delay(50);
+
+    // Button clicked.
+    if (autoCyclePatterns) {
+      autoCyclePatterns = false;
+      activePatternIndex = 0;
+    } else if (activePatternIndex == numPatterns - 1) {
+      autoCyclePatterns = true;
+      cyclePatternTimer.reset();
+      activePatternIndex = 0;
+    } else {
+      activePatternIndex++;
+    }
   }
   prevButtonRead = buttonRead;
 
@@ -106,18 +122,20 @@ void loop() {
 
   activePatterns[activePatternIndex]->show();
 
-  // Pattern transition
-  if (brightness > 0 && playPattern.complete()) {
-    // Fade out
-    brightness -= fadeIncrement;
-  } else if (brightness <= 0) {
-    // Increment active pattern
-    activePatternIndex = (activePatternIndex + 1) % numPatterns;
-    playPattern.reset();
-    brightness = 1;
-  } else if (brightness < MAX_BRIGHTNESS) {
-    // Fade in
-    brightness += fadeIncrement;
+  if (autoCyclePatterns) {
+    // Pattern transition
+    if (brightness > 0 && cyclePatternTimer.complete()) {
+      // Fade out
+      brightness -= fadeIncrement;
+    } else if (brightness <= 0) {
+      // Increment active pattern
+      activePatternIndex = (activePatternIndex + 1) % numPatterns;
+      cyclePatternTimer.reset();
+      brightness = 1;
+    } else if (brightness < MAX_BRIGHTNESS) {
+      // Fade in
+      brightness += fadeIncrement;
+    }
   }
 
   FastLED.setBrightness(brightness);
